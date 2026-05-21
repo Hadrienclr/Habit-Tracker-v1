@@ -198,7 +198,7 @@
 const {useState,useEffect,useRef,useMemo,useCallback}=React;
 
 // ── Durées médicales sevrage ──────────────────────────────────────────────────
-const SEV={tabac:90,cannabis:90,alcool:180,cocaine:180,mdma:365,amphet:180,heroine:365,ketamine:180,lsd:30,champi:14,crack:180,benzo:180,meth:730,poppers:7,ghb:30,proto:90};
+const SEV={tabac:90,cannabis:90,alcool:180,cocaine:180,mdma:365,amphet:180,heroine:365,ketamine:180,lsd:30,champi:14,crack:180,benzo:180,meth:730,poppers:7,ghb:30,proto:90,porno:180};
 
 // ── Coût par défaut / prise ───────────────────────────────────────────────────
 const DEF_COST={alcool:3,cocaine:10,mdma:15,amphet:10,heroine:30,ketamine:20,lsd:15,champi:20,crack:25,benzo:2,meth:30,poppers:5,ghb:8,proto:2};
@@ -213,14 +213,14 @@ const DRUGS={
     rec:[{t:"72h",d:"THC sanguin en baisse",days:3},{t:"1 sem.",d:"Sommeil profond restauré",days:7},{t:"1 mois",d:"Endocannabinoïde rétabli",days:30},{t:"3 mois",d:"Cognition restaurée",days:90}],
     organs:{poumons:70,coeur:30,cerveau:85,foie:20},
     ot:{poumons:{low:"4× plus de goudron que le tabac.",mid:"Inflammation bronchique en régression.",high:"En bonne progression."},coeur:{low:"Tachycardie post-prise.",mid:"Fréquence cardiaque se normalise.",high:"Impact limité."},cerveau:{low:"THC altère mémoire et motivation.",mid:"Endocannabinoïde se rééquilibre.",high:"Cognition en récupération."},foie:{low:"Légère surcharge.",mid:"Foie élimine le THC.",high:"Peu affecté."}}},
-  alcool:{name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",on:true,warning:"⚠️ Dépendance physique possible — consulter si usage quotidien",
+  alcool:{name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",on:true,
     rec:[{t:"72h",d:"Pic sevrage (surveillance si dépendant)",days:3},{t:"1 sem.",d:"Sommeil restauré",days:7},{t:"1 mois",d:"Foie partiellement régénéré",days:30},{t:"6 mois",d:"Récupération établie",days:180}],
     organs:{poumons:15,coeur:60,cerveau:70,foie:95},
-    ot:{poumons:{low:"Fragilise l'immunité pulmonaire.",mid:"En diminution.",high:"Peu affectés."},coeur:{low:"Arythmies possibles.",mid:"Rythme cardiaque se stabilise.",high:"En bonne progression."},cerveau:{low:"Altération mémoire et jugement.",mid:"Neurotransmetteurs en rééquilibrage.",high:"Cognition en progression."},foie:{low:"Stéatose hépatique possible.",mid:"Foie se régénère.",high:"En bonne progression."}}},
+    ot:{poumons:{low:"Fragilise l'immunité pulmonaire.",mid:"En diminution.",high:"Peu affectés."},coeur:{low:"Arythmies possibles.",mid:"Rythme cardiaque se stabilise.",high:"En bonne progression."},cerveau:{low:"Altération mémoire et jugement.",mid:"Neurotransmetteurs en rééquilibrage.",high:"Cognition en progression."},foie:{low:"Stéatose hépatique possible à terme.",mid:"Foie se régénère.",high:"En bonne progression."}}},
   cocaine:{name:"Cocaïne",emoji:"🤍",color:"#e5e7eb",risk:"Très élevé",riskColor:"#ef4444",unit:"lignes",unitShort:"ligne",on:false,
     rec:[{t:"24h",d:"Crash, craving",days:1},{t:"6 sem.",d:"Symptômes en baisse",days:42},{t:"6 mois",d:"Récupération établie",days:180}],
     organs:{poumons:45,coeur:92,cerveau:82,foie:35},
-    ot:{poumons:{low:"Dommages nasaux et pulmonaires.",mid:"Muqueuses en réparation.",high:"En progression."},coeur:{low:"Risque cardiovasculaire élevé.",mid:"Vasoconstriction en baisse.",high:"Risque en diminution."},cerveau:{low:"Déplétion dopaminergique.",mid:"Dopamine en normalisation.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+    ot:{poumons:{low:"Dommages nasaux et pulmonaires.",mid:"Muqueuses en réparation.",high:"En progression."},coeur:{low:"Risque cardiovasculaire élevé à surveiller.",mid:"Vasoconstriction en baisse.",high:"Risque en diminution."},cerveau:{low:"Déplétion dopaminergique.",mid:"Dopamine en normalisation.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
   mdma:{name:"MDMA",emoji:"💗",color:"#ec4899",risk:"Élevé",riskColor:"#f97316",unit:"prises",unitShort:"prise",on:false,
     rec:[{t:"3 jours",d:"Pic dépression sérotoninergique",days:3},{t:"1 mois",d:"Sérotonine en régénération",days:30},{t:"12 mois",d:"Récupération établie",days:365}],
     organs:{poumons:10,coeur:45,cerveau:90,foie:55},
@@ -264,11 +264,15 @@ const DRUGS={
   ghb:{name:"GHB / GBL",emoji:"🥤",color:"#0ea5e9",risk:"Très élevé",riskColor:"#ef4444",unit:"doses",unitShort:"dose",on:false,warning:"⚠️ Ne pas arrêter seul — risque de convulsions",
     rec:[{t:"72h",d:"Sevrage intense si dépendant",days:3},{t:"1 mois",d:"Récupération établie",days:30}],
     organs:{poumons:12,coeur:32,cerveau:62,foie:42},
-    ot:{poumons:{low:"Dépression respiratoire.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Bradycardie.",mid:"En normalisation.",high:"En progression."},cerveau:{low:"Dépendance rapide.",mid:"GABA se rééquilibre.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
+    ot:{poumons:{low:"Dépression respiratoire.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Bradycardie.",mid:"En normalisation.",high:"En progression."},cerveau:{low:"Dépendance rapide possible.",mid:"GABA se rééquilibre.",high:"En récupération."},foie:{low:"Surcharge.",mid:"En récupération.",high:"Partiellement régénéré."}}},
   proto:{name:"Protoxyde d'azote",emoji:"🎈",color:"#a3e635",risk:"Modéré",riskColor:"#a855f7",unit:"cartouches",unitShort:"cart.",on:false,
     rec:[{t:"3 mois",d:"Récupération établie",days:90}],
     organs:{poumons:12,coeur:5,cerveau:32,foie:5},
     ot:{poumons:{low:"Irritation des voies.",mid:"En amélioration.",high:"Sains."},coeur:{low:"Peu impacté.",mid:"Sain.",high:"Sain."},cerveau:{low:"Déficit B12 possible.",mid:"Avec B12 : amélioration.",high:"En progression."},foie:{low:"Peu impacté.",mid:"Sain.",high:"Sain."}}},
+  porno:{name:"Porno",emoji:"📵",color:"#ec4899",risk:"Comportemental",riskColor:"#a855f7",unit:"sessions",unitShort:"session",on:false,
+    rec:[{t:"2 sem.",d:"Circuits de récompense en rééquilibrage",days:14},{t:"1 mois",d:"Dopamine en normalisation",days:30},{t:"3 mois",d:"Sensibilité et relations améliorées",days:90},{t:"6 mois",d:"Récupération comportementale établie",days:180}],
+    organs:{poumons:0,coeur:5,cerveau:75,foie:0},
+    ot:{poumons:{low:"Pas d'impact direct.",mid:"Pas d'impact.",high:"Pas d'impact."},coeur:{low:"Légère activation du stress chronique.",mid:"En normalisation.",high:"Peu impacté."},cerveau:{low:"Activation dopaminergique intense et répétée. Désensibilisation progressive possible.",mid:"Circuits de récompense en rééquilibrage progressif.",high:"Sensibilité en récupération."},foie:{low:"Pas d'impact direct.",mid:"Pas d'impact.",high:"Pas d'impact."}}},
 };
 
 const MONTHS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
@@ -435,44 +439,43 @@ function ScoreLevelModal({sc,streak,act,onClose}){
   </div>;
 }
 
-// ── Organ card ────────────────────────────────────────────────────────────────
-function OrganCard({organKey,emoji,name,streak,act,loggedDays}){
-  const [flipped,setFlipped]=useState(false);
+// ── Organ card — version éducative sans % de santé ───────────────────────────
+function OrganCard({organKey,emoji,name,streak,act}){
+  const [open,setOpen]=useState(false);
   const active=Object.keys(act).filter(k=>act[k]);
-  const maxD=active.reduce((mx,k)=>Math.max(mx,DRUGS[k]?.organs?.[organKey]||0),0);
-  const maxDays=active.length>0?Math.max(...active.map(k=>SEV[k]||90)):90;
-  const hr=Math.min(streak/maxDays,1);
-  const health=maxD===0?100:Math.round(30+(100-30)*(1-maxD/100*(1-hr)));
-  const color=health>=80?"#22c55e":health>=60?"#4ade80":health>=40?"#f97316":"#ef4444";
-  const status=health>=80?"Tendance positive":health>=60?"En amélioration":health>=40?"Attention recommandée":"À surveiller";
-  const tier=health>=70?"high":health>=40?"mid":"low";
+  // Texte éducatif : on prend le texte "high" (positif) si streak>30j, "mid" si >7j, sinon "low"
+  const tier=streak>=30?"high":streak>=7?"mid":"low";
   const texts=active.map(k=>DRUGS[k]?.ot?.[organKey]?.[tier]).filter(Boolean);
-  const text=texts.length>0?texts[0]:`Indicateur estimé à ${health}% sur la base de ${streak} jours.`;
-  const hasEnough=loggedDays>=5;
-  return<div className={`organ-flip${flipped?" flipped":""}`} onClick={()=>hasEnough&&setFlipped(f=>!f)} style={{cursor:hasEnough?"pointer":"default"}}>
-    <div className="organ-flip-inner">
-      <div className="organ-face organ-front">
-        {hasEnough&&<div className="flip-hint"><svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div>}
-        <div style={{fontSize:26,marginBottom:4}}>{emoji}</div>
-        <div style={{fontSize:11,fontWeight:600,color:"var(--t2)",marginBottom:4}}>{name}</div>
-        {hasEnough?<>
-          <div style={{fontSize:22,fontWeight:700,color,lineHeight:1}}>{health}%</div>
-          <div style={{fontSize:9,color,marginTop:2,marginBottom:4}}>{status}</div>
-          <div className="organ-pb" style={{marginTop:"auto"}}><OBar pct={health} color={color}/></div>
-        </>:<>
-          <div style={{fontSize:11,color:"var(--t3)",textAlign:"center",lineHeight:1.4,padding:"0 4px"}}>Renseigne 5 journées pour voir</div>
-          <div style={{fontSize:13,fontWeight:600,color:"var(--green2)",marginTop:6}}>{loggedDays}/5</div>
-          <div className="organ-pb" style={{marginTop:"auto"}}><div style={{height:"100%",background:"var(--green)",borderRadius:2,width:`${(loggedDays/5)*100}%`,transition:"width .9s"}}></div></div>
-        </>}
-      </div>
-      <div className="organ-face organ-back-face">
-        <div style={{fontSize:11,fontWeight:700,color,marginBottom:6}}>{emoji} {name} — {health}%</div>
-        <p style={{fontSize:11,color:"var(--t)",lineHeight:1.55,flex:1}}>{text}</p>
-        <div style={{fontSize:9,color:"var(--t3)",marginTop:6}}>Indicateur éducatif · Source INSERM/OMS</div>
-        <div style={{fontSize:9,color:"var(--t3)",marginTop:3}}>Tap pour retourner</div>
-      </div>
+  const text=texts.length>0?texts[0]:`Continue sur ta lancée. Chaque jour sans consommer est bénéfique pour cet organe.`;
+  // Couleur indicative basée uniquement sur le streak
+  const streakColor=streak>=30?"#22c55e":streak>=14?"#4ade80":streak>=7?"#f97316":"var(--t3)";
+  const streakLabel=streak>=30?"Bon rythme":streak>=14?"En progression":streak>=7?"Début positif":"Continue";
+  return<>
+    <div style={{background:"var(--bg2)",border:"1px solid var(--b)",borderRadius:14,padding:"12px 10px",display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer",boxShadow:"var(--sh)",position:"relative"}} onClick={()=>setOpen(o=>!o)}>
+      <div style={{position:"absolute",top:7,right:8,opacity:0.3,color:"var(--t3)"}}><svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div style={{fontSize:26,marginBottom:6}}>{emoji}</div>
+      <div style={{fontSize:11,fontWeight:600,color:"var(--t2)",marginBottom:4}}>{name}</div>
+      <div style={{fontSize:10,fontWeight:600,color:streakColor,padding:"2px 8px",borderRadius:8,background:streakColor+"22",border:`1px solid ${streakColor}44`}}>{streakLabel}</div>
     </div>
-  </div>;
+    {open&&<div className="mo" onClick={()=>setOpen(false)}>
+      <div className="mb" onClick={e=>e.stopPropagation()}>
+        <div className="mh" onClick={()=>setOpen(false)}/>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+          <div style={{fontSize:32}}>{emoji}</div>
+          <div>
+            <div style={{fontSize:16,fontWeight:700,color:"var(--t)"}}>{name}</div>
+            <div style={{fontSize:11,color:streakColor,fontWeight:600}}>{streakLabel} · {streak}j de streak</div>
+          </div>
+        </div>
+        <div style={{padding:"12px 14px",background:"var(--s)",borderRadius:12,border:"1px solid var(--b)",marginBottom:12}}>
+          <p style={{fontSize:13,color:"var(--t)",lineHeight:1.65}}>{text}</p>
+        </div>
+        <div style={{padding:"10px 12px",background:"rgba(34,197,94,0.07)",borderRadius:10,border:"1px solid rgba(34,197,94,0.15)"}}>
+          <div style={{fontSize:10,color:"var(--t3)",lineHeight:1.5}}>ℹ️ Ces informations sont éducatives et basées sur des données INSERM/OMS. Elles ne constituent pas un avis médical.</div>
+        </div>
+      </div>
+    </div>}
+  </>;
 }
 
 // ── Drug Timeline ─────────────────────────────────────────────────────────────
@@ -877,6 +880,7 @@ function MainApp(){
   const [showLevel,setShowLevel]=useState(false);
   const [pulse,setPulse]=useState(false);
   const prevStreak=useRef(0);
+  const [helpDrug,setHelpDrug]=useState(null);
 
   useEffect(()=>{sv(ST,data);},[data]);
   useEffect(()=>{sv(GT,goals);},[goals]);
@@ -900,6 +904,7 @@ function MainApp(){
     return[s,lg];
   },[data,act]);
   useEffect(()=>{if(streak>prevStreak.current){setPulse(true);setTimeout(()=>setPulse(false),600);}prevStreak.current=streak;},[streak]);
+  const isCurrentMonth=year===today.getFullYear()&&month===today.getMonth();
   const sc=score(streak,longest,pct,nClean,dCount,logged,act);
   const scColor=sc>=70?"#22c55e":sc>=40?"#f97316":"#ef4444";
   const lv=getLevel(streak,act);
@@ -936,7 +941,7 @@ function MainApp(){
     <div className="hdr">
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
         <div>
-          <div style={{fontSize:9,letterSpacing:".15em",color:"var(--t3)",textTransform:"uppercase",fontWeight:600}}>Mon parcours · Outil éducatif</div>
+          <div style={{fontSize:9,letterSpacing:".15em",color:"var(--t3)",textTransform:"uppercase",fontWeight:600}}>Mon parcours</div>
           <h1 style={{fontSize:18,fontWeight:700,color:"var(--t)",lineHeight:1.1,letterSpacing:"-.02em"}}>Habit Tracker{profile.name?` · ${profile.name}`:""}</h1>
         </div>
         <button onClick={()=>setShowProfile(true)} style={{width:34,height:34,borderRadius:"50%",background:"var(--s)",border:"1px solid var(--b)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,color:"var(--t2)"}}>
@@ -954,7 +959,7 @@ function MainApp(){
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{flex:1}}>
               <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Indice de progression</div>
-              <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1,letterSpacing:"-.02em"}}>{sc}<span style={{fontSize:18}}>/100</span></div>
+              <div style={{fontSize:48,fontWeight:700,color:isCurrentMonth?scColor:"var(--t3)",lineHeight:1,letterSpacing:"-.02em"}}>{isCurrentMonth?sc:"—"}<span style={{fontSize:isCurrentMonth?18:14}}>{isCurrentMonth?"/100":" mois passé"}</span></div>
               <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
                 <span className="level-badge" style={{background:lv.color+"22",color:lv.color,border:`1px solid ${lv.color}44`}}>Niv.{lv.n} · {lv.label}</span>
                 <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1046,7 +1051,7 @@ function MainApp(){
       {tab==="heal"&&<div className="tc">
         <div className="card" style={{background:"linear-gradient(135deg,var(--bg2),var(--bg3))",cursor:"pointer"}} onClick={()=>setShowLevel(true)}>
           <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Indice de progression</div>
-          <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1}}>{sc}<span style={{fontSize:18}}>/100</span></div>
+          <div style={{fontSize:48,fontWeight:700,color:isCurrentMonth?scColor:"var(--t3)",lineHeight:1}}>{isCurrentMonth?sc:"—"}<span style={{fontSize:isCurrentMonth?18:14}}>{isCurrentMonth?"/100":" mois passé"}</span></div>
           <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
             <span className="level-badge" style={{background:lv.color+"22",color:lv.color,border:`1px solid ${lv.color}44`}}>Niv.{lv.n} · {lv.label}</span>
             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1060,18 +1065,15 @@ function MainApp(){
         <div className="card">
           <div className="clbl">Indicateurs éducatifs — tap pour détails</div>
           <div className="organ-grid">
-            {[{k:"poumons",e:"🫁",n:"Poumons"},{k:"coeur",e:"🫀",n:"Cœur"},{k:"cerveau",e:"🧠",n:"Cerveau"},{k:"foie",e:"🟤",n:"Foie"}].map(o=><OrganCard key={o.k} organKey={o.k} emoji={o.e} name={o.n} streak={streak} act={act} loggedDays={allLogged}/>)}
+            {[{k:"poumons",e:"🫁",n:"Poumons"},{k:"coeur",e:"🫀",n:"Cœur"},{k:"cerveau",e:"🧠",n:"Cerveau"},{k:"foie",e:"🟤",n:"Foie"}].map(o=><OrganCard key={o.k} organKey={o.k} emoji={o.e} name={o.n} streak={streak} act={act}/>)}
           </div>
-          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>{allLogged<5?`Renseigne encore ${5-allLogged} journée(s) pour voir tes indicateurs`:"Indicateurs éducatifs · Source INSERM/OMS"}</div>
+          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>Tap sur un organe pour les infos éducatives</div>
         </div>
 
         <DrugTimeline streak={streak} act={act}/>
 
-        <div className="xcard">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-            <div className="clbl" style={{margin:0}}>Tendance 30 jours</div>
-            <button className="xbtn" style={{position:"relative",top:0,right:0}} onClick={()=>setExpand("spark")}><IcExp/></button>
-          </div>
+        <div className="card">
+          <div className="clbl">Tendance 30 jours</div>
           <Chart spark={spark}/>
         </div>
 
@@ -1083,6 +1085,27 @@ function MainApp(){
           <div style={{marginBottom:9}}><div style={{fontSize:9,color:"var(--green)",fontWeight:600,marginBottom:4}}>✦ Jours clean</div><WBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
           {aList.map(k=><div key={k} style={{marginBottom:9}}><div style={{fontSize:9,color:DRUGS[k]?.color,fontWeight:600,marginBottom:4}}>{DRUGS[k]?.emoji} {DRUGS[k]?.name}</div><WBars weeks={weeklyData} metric={k} color={DRUGS[k]?.color}/></div>)}
         </div>
+
+        {/* Stats contextes */}
+        {(()=>{
+          const allCtx={};
+          Object.values(data).forEach(e=>{if(e?.ctx?.length>0)e.ctx.forEach(c=>{allCtx[c]=(allCtx[c]||0)+1;});});
+          const sorted=Object.entries(allCtx).sort((a,b)=>b[1]-a[1]);
+          if(sorted.length===0)return null;
+          const total=sorted.reduce((s,[,v])=>s+v,0);
+          return<div className="card">
+            <div className="clbl">Contextes de consommation</div>
+            <div style={{fontSize:11,color:"var(--t3)",marginBottom:12}}>Situations associées à tes prises renseignées</div>
+            {sorted.map(([ctx,count])=><div key={ctx} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{fontSize:12,color:"var(--t)"}}>{ctx}</span>
+                <span style={{fontSize:11,fontWeight:600,color:"var(--green2)"}}>{count}x</span>
+              </div>
+              <div className="pb"><div className="pf" style={{background:"var(--green)",width:`${(count/total)*100}%`,transition:"width .8s cubic-bezier(.4,0,.2,1)"}}/></div>
+            </div>)}
+            <div style={{marginTop:8,fontSize:10,color:"var(--t3)"}}>Basé sur {total} prise(s) avec contexte</div>
+          </div>;
+        })()}
 
         {money.total!=="0.00"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)"}}><div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:4}}>Économies ce mois</div><div style={{fontSize:28,fontWeight:700,color:"#d8b4fe"}}>{money.total}€</div>{money.details.map(d=><div key={d.name} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--t2)",marginBottom:3}}><span>{d.emoji} {d.name}</span><span style={{color:"#d8b4fe",fontWeight:600}}>{d.saved}€</span></div>)}</div>}
       </div>}
@@ -1111,11 +1134,11 @@ function MainApp(){
             <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></div>
             <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Substances actives</div>
           </div>
-          {sortedDrugs.map(([k,d])=><div key={k} className={`drug-chip${act[k]?" on":""}`} onClick={()=>setAct(prev=>({...prev,[k]:!prev[k]}))}>
+          {sortedDrugs.map(([k,d])=><div key={k} className={`drug-chip${act[k]?" on":""}`} onClick={()=>d.warning&&!act[k]?setHelpDrug(k):setAct(prev=>({...prev,[k]:!prev[k]}))}>
             <div style={{fontSize:17,width:26,textAlign:"center"}}>{d.emoji}</div>
             <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:500,color:act[k]?d.color:"var(--t3)"}}>{d.name}</div>
-              <div style={{fontSize:10,color:"var(--t3)"}}>Objectif : {SEV[k]}j{d.warning?` · ⚠️`:""}</div>
+              <div style={{fontSize:13,fontWeight:500,color:act[k]?(d.color==="#e5e7eb"?"var(--t)":d.color):"var(--t3)"}}>{d.name}</div>
+              <div style={{fontSize:10,color:"var(--t3)"}}>Objectif : {SEV[k]}j</div>
             </div>
             <div style={{fontSize:10,padding:"2px 8px",borderRadius:10,fontWeight:600,background:`${d.riskColor}22`,color:d.riskColor,flexShrink:0}}>{d.risk}</div>
             <div className={`toggle${act[k]?" on":" off"}`} style={{background:act[k]?d.color:undefined}}/>
@@ -1150,6 +1173,27 @@ function MainApp(){
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
           {[{v:streak+"j",l:"streak",c:"var(--green)"},{v:sc,l:"score",c:scColor},{v:earnedCount,l:"badges",c:"var(--green2)"},{v:longest+"j",l:"record",c:"#a855f7"}].map(s=><div key={s.l} className="card" style={{textAlign:"center",margin:0}}><div style={{fontSize:22,fontWeight:700,color:s.c}}>{s.v}</div><div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{s.l}</div></div>)}
         </div>
+
+        {/* Numéros d'aide */}
+        <div className="card" style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.18)"}}>
+          <div style={{fontSize:10,color:"#fb923c",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:12}}>Besoin d'aide</div>
+          {[
+            {name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24 et 7j/7",color:"#fb923c"},
+            {name:"Alcool Info Service",num:"0 980 980 930",desc:"Gratuit, anonyme, 8h-2h",color:"#3b82f6"},
+            {name:"Tabac Info Service",num:"39 89",desc:"Gratuit, anonyme, 8h-20h du lundi au samedi",color:"#f97316"},
+            {name:"Numéro national prévention suicide",num:"3114",desc:"Gratuit, 24h/24 et 7j/7",color:"#a855f7"},
+            {name:"SAMU",num:"15",desc:"Urgence médicale",color:"#ef4444"},
+          ].map(n=><div key={n.num} style={{display:"flex",alignItems:"center",gap:12,paddingBottom:10,marginBottom:10,borderBottom:"1px solid var(--b)"}}>
+            <div style={{width:48,height:48,borderRadius:12,background:n.color+"22",border:`1px solid ${n.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <span style={{fontSize:13,fontWeight:700,color:n.color}}>{n.num}</span>
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{n.name}</div>
+              <div style={{fontSize:10,color:"var(--t3)",marginTop:2}}>{n.desc}</div>
+            </div>
+          </div>)}
+          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",lineHeight:1.5}}>Ces services sont confidentiels et gratuits. Parler à quelqu'un peut changer les choses.</div>
+        </div>
       </div>}
 
     </div>
@@ -1164,10 +1208,32 @@ function MainApp(){
       <div style={{background:"var(--s)",borderRadius:13,padding:13}}><div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:9}}>✦ Jours clean</div><WBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
       {aList.map(k=><div key={k} style={{background:"var(--s)",borderRadius:13,padding:13}}><div style={{fontSize:11,color:DRUGS[k]?.color,fontWeight:600,marginBottom:9}}>{DRUGS[k]?.emoji} {DRUGS[k]?.name}</div><WBars weeks={weeklyData} metric={k} color={DRUGS[k]?.color}/></div>)}
     </ExpandView>}
-    {expand==="spark"&&<ExpandView title="Tendance 30 jours" onClose={()=>setExpand(null)}>
-      <div style={{background:"var(--s)",borderRadius:14,padding:14}}><Chart spark={spark}/></div>
-    </ExpandView>}
+    
 
+    {helpDrug&&<div className="mo" onClick={()=>setHelpDrug(null)}>
+      <div className="mb" onClick={e=>e.stopPropagation()}>
+        <div className="mh" onClick={()=>setHelpDrug(null)}/>
+        <div style={{textAlign:"center",marginBottom:16}}>
+          <div style={{fontSize:32,marginBottom:8}}>{DRUGS[helpDrug]?.emoji}</div>
+          <div style={{fontSize:16,fontWeight:700,color:"var(--t)",marginBottom:4}}>{DRUGS[helpDrug]?.name}</div>
+          <div style={{display:"inline-block",fontSize:11,padding:"3px 10px",borderRadius:10,background:`${DRUGS[helpDrug]?.riskColor}22`,color:DRUGS[helpDrug]?.riskColor,fontWeight:600,border:`1px solid ${DRUGS[helpDrug]?.riskColor}44`}}>{DRUGS[helpDrug]?.risk}</div>
+        </div>
+        {DRUGS[helpDrug]?.warning&&<div style={{padding:"10px 12px",background:"rgba(249,115,22,0.08)",borderRadius:10,border:"1px solid rgba(249,115,22,0.2)",marginBottom:14}}>
+          <div style={{fontSize:12,color:"#fb923c",lineHeight:1.5}}>{DRUGS[helpDrug].warning.replace("⚠️ ","")}</div>
+        </div>}
+        <div style={{fontSize:11,fontWeight:600,color:"var(--t)",marginBottom:10}}>Numéros d'aide disponibles</div>
+        {[{name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",desc:"Urgence médicale"}].map(n=><div key={n.num} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)"}}>
+          <div style={{width:44,height:44,borderRadius:10,background:"rgba(249,115,22,0.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <span style={{fontSize:12,fontWeight:700,color:"#fb923c"}}>{n.num}</span>
+          </div>
+          <div><div style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{n.name}</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{n.desc}</div></div>
+        </div>)}
+        <div style={{display:"flex",gap:8,marginTop:4}}>
+          <button onClick={()=>setHelpDrug(null)} style={{flex:1,padding:"11px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Annuler</button>
+          <button onClick={()=>{setAct(prev=>({...prev,[helpDrug]:!prev[helpDrug]}));setHelpDrug(null);}} style={{flex:2,padding:"11px",borderRadius:10,background:"rgba(34,197,94,0.15)",border:"1.5px solid rgba(34,197,94,0.3)",color:"var(--green2)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Ajouter quand même</button>
+        </div>
+      </div>
+    </div>}
     {showLevel&&<ScoreLevelModal sc={sc} streak={streak} act={act} onClose={()=>setShowLevel(false)}/>}
     {showProfile&&<ProfileModal profile={profile} setProfile={setProfile} onClose={()=>setShowProfile(false)}/>}
     {showWidgets&&<WidgetMgr widgets={widgets} setWidgets={setWidgets} onClose={()=>setShowWidgets(false)}/>}

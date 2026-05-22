@@ -646,50 +646,73 @@ function PieStats({data,act,aList}){
   const today=new Date();
   const days30=Array.from({length:30},(_,i)=>{
     const d=new Date(today);d.setDate(d.getDate()-(29-i));
-    const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
     return data[k]||null;
   });
-  function Pie({cleanD,consoD,total,color,name,emoji}){
-    if(total===0)return null;
-    const r=36,cx=50,cy=50;
-    const cPct=cleanD/total,csPct=consoD/total;
-    function arc(startP,p,col){
-      if(p<=0)return null;
-      const s=startP*2*Math.PI-Math.PI/2,e=(startP+p)*2*Math.PI-Math.PI/2;
-      const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);
-      return <path d={"M "+cx+" "+cy+" L "+x1+" "+y1+" A "+r+" "+r+" 0 "+(p>0.5?"1":"0")+" 1 "+x2+" "+y2+" Z"} fill={col}/>;
-    }
-    return <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-      <svg width={80} height={80} viewBox="0 0 100 100" style={{flexShrink:0}}>
-        <circle cx={cx} cy={cy} r={r} fill="var(--s2)"/>
-        {arc(0,cPct,"#22c55e")}
-        {arc(cPct,csPct,color)}
-        {arc(cPct+csPct,1-cPct-csPct,"var(--b2)")}
-        <circle cx={cx} cy={cy} r={22} fill="var(--bg2)"/>
-        <text x={cx} y={cy-4} textAnchor="middle" fontSize="14" fontWeight="700" fill="#22c55e">{Math.round(cPct*100)}%</text>
-        <text x={cx} y={cy+10} textAnchor="middle" fontSize="8" fill="var(--t3)">clean</text>
-      </svg>
-      <div style={{flex:1}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:16}}>{emoji}</span><span style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{name}</span></div>
-        <div style={{fontSize:11,color:"var(--t2)",marginBottom:2}}>{cleanD}j clean sur 30</div>
-        {consoD>0&&<div style={{fontSize:11,color:color}}>{consoD}j avec consommation</div>}
-      </div>
-    </div>;
-  }
   const clean30=days30.filter(e=>e&&isClean(e,act)).length;
-  const conso30=days30.filter(e=>e&&!isClean(e,act)&&e.logged).length;
+  const nonLog=days30.filter(e=>!e||!e.logged).length;
+  const drugsSegs=aList.map(k=>({key:k,color:DRUGS[k]?.color||"#888",name:DRUGS[k]?.name||k,emoji:DRUGS[k]?.emoji||"",days:days30.filter(e=>e&&(e[k]||0)>0).length})).filter(d=>d.days>0);
+  const segments=[
+    {color:"#22c55e",label:"Clean",emoji:"✦",days:clean30},
+    ...drugsSegs.map(d=>({color:d.color,label:d.name,emoji:d.emoji,days:d.days})),
+    {color:"var(--b2)",label:"Non renseigne",emoji:"",days:nonLog},
+  ].filter(s=>s.days>0);
+  const total=segments.reduce((s,sg)=>s+sg.days,0);
+  if(total===0)return <div style={{fontSize:12,color:"var(--t3)",textAlign:"center",padding:"20px 0"}}>Aucune donnee sur 30 jours</div>;
+  const r=70,cx=100,cy=100;
+  let cur=0;
+  const arcs=segments.map((sg,i)=>{
+    const pct=sg.days/total;
+    const a=pct*2*Math.PI;
+    const s=cur-Math.PI/2,e=cur+a-Math.PI/2;
+    const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);
+    cur+=a;
+    return <path key={i} d={"M "+cx+" "+cy+" L "+x1+" "+y1+" A "+r+" "+r+" 0 "+(a>Math.PI?"1":"0")+" 1 "+x2+" "+y2+" Z"} fill={sg.color}/>;
+  });
+  const cleanPct=Math.round((clean30/total)*100);
   return <div>
-    <Pie cleanD={clean30} consoD={conso30} total={30} color="#f97316" name="Ensemble" emoji="✦"/>
-    {aList.map(k=>{
-      const cD=days30.filter(e=>e&&e.logged&&(e[k]||0)===0).length;
-      const csD=days30.filter(e=>e&&(e[k]||0)>0).length;
-      return <Pie key={k} cleanD={cD} consoD={csD} total={30} color={DRUGS[k]?.color||"#888"} name={DRUGS[k]?.name||k} emoji={DRUGS[k]?.emoji||""}/>;
-    })}
-    <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",marginTop:4}}>Basé sur les 30 derniers jours</div>
+    <div style={{display:"flex",justifyContent:"center",marginBottom:14}}>
+      <svg width={200} height={200} viewBox="0 0 200 200">
+        <circle cx={cx} cy={cy} r={r} fill="var(--s2)"/>
+        {arcs}
+        <circle cx={cx} cy={cy} r={44} fill="var(--bg2)"/>
+        <text x={cx} y={cy-8} textAnchor="middle" fontSize="20" fontWeight="700" fill="#22c55e">{cleanPct}%</text>
+        <text x={cx} y={cy+10} textAnchor="middle" fontSize="10" fill="var(--t3)">clean</text>
+        <text x={cx} y={cy+24} textAnchor="middle" fontSize="9" fill="var(--t3)">{clean30}j / 30j</text>
+      </svg>
+    </div>
+    <div style={{display:"flex",flexDirection:"column",gap:7}}>
+      {segments.map((sg,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
+        <div style={{width:10,height:10,borderRadius:2,background:sg.color,flexShrink:0}}/>
+        <div style={{flex:1,fontSize:12,color:"var(--t2)"}}>{sg.emoji?" "+sg.emoji:""} {sg.label}</div>
+        <div style={{fontSize:12,fontWeight:600,color:sg.color}}>{sg.days}j</div>
+        <div style={{fontSize:10,color:"var(--t3)",minWidth:28,textAlign:"right"}}>{Math.round(sg.days/total*100)}%</div>
+      </div>)}
+    </div>
+    <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",marginTop:8}}>30 derniers jours</div>
+  </div>;
+}
+function MoneyCard({money}){
+  const [open,setOpen]=useState(true);
+  return <div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+      <div>
+        <div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:2}}>Economies ce mois</div>
+        <div style={{fontSize:28,fontWeight:700,color:"#d8b4fe",lineHeight:1}}>{money.total}€</div>
+      </div>
+      <div style={{color:"#a855f7",transform:open?"rotate(180deg)":"none",transition:"transform .2s"}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    {open&&money.details.length>0&&<div style={{marginTop:12,paddingTop:12,borderTop:"1px solid rgba(168,85,247,0.15)"}}>
+      {money.details.map(d=><div key={d.name} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid rgba(168,85,247,0.08)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16}}>{d.emoji}</span><span style={{fontSize:12,fontWeight:500,color:"var(--t)"}}>{d.name}</span></div>
+        <span style={{fontSize:14,fontWeight:700,color:"#d8b4fe"}}>{d.saved}€</span>
+      </div>)}
+    </div>}
+    {open&&money.details.length===0&&<div style={{marginTop:8,fontSize:11,color:"var(--t3)"}}>Configure les couts dans les reglages.</div>}
   </div>;
 }
 
-// ── Drug timeline ─────────────────────────────────────────────────────────────
+
 function DrugTimeline({streak,act}){
   const drugs=Object.keys(act).filter(k=>act[k]&&DRUGS[k]?.rec?.length>0);
   const [sel,setSel]=useState(()=>drugs[0]||null);
@@ -775,7 +798,7 @@ function DayModal({modal,data,act,onSave,onClear,onClose}){
       })}
       <div className="slbl">Humeur</div>
       <div className="mood-row">{MOODS.map((m,i)=><button key={i} className={"mood-btn"+(local.mood===i?" on":"")} style={{borderColor:local.mood===i?m.c:"transparent",color:local.mood===i?m.c:"var(--t3)"}} onClick={()=>setLocal(p=>({...p,mood:p.mood===i?null:i}))}><span>{m.e}</span><span>{m.l}</span></button>)}</div>
-      {hasCons&&<><div className="slbl">Contexte</div><div className="tag-row">{CTXS.map(c=><button key={c} className={"tag"+((local.ctx||[]).includes(c)?" on":"")} onClick={()=>setLocal(p=>({...p,ctx:(p.ctx||[]).includes(c)?(p.ctx||[]).filter(x=>x!==c):[...(p.ctx||[]),c]}))}>{c}</button>)}</div></>}
+
       <div className="slbl">Note</div>
       <textarea rows={2} placeholder="Comment tu te sens ?" value={local.note||""} onChange={e=>setLocal(p=>({...p,note:e.target.value}))}/>
       <div style={{display:"flex",gap:7,marginTop:12}}>
@@ -790,8 +813,8 @@ function DayModal({modal,data,act,onSave,onClear,onClose}){
 function HelpFlipCard(){
   const [flipped,setFlipped]=useState(false);
   const NUMS=[
-    {name:"Drogues Info Service",num:"0800231313",display:"0 800 23 13 13",desc:"Gratuit · Anonyme · 24h/24",color:"#fb923c"},
-    {name:"Alcool Info Service",num:"0980980930",display:"0 980 980 930",desc:"Gratuit · Anonyme · 8h-2h",color:"#3b82f6"},
+    {name:"Drogues Info Service",num:"0800231313",display:"08 00 23 13 13",desc:"Gratuit · Anonyme · 24h/24",color:"#fb923c"},
+    {name:"Alcool Info Service",num:"0980980930",display:"09 80 98 09 30",desc:"Gratuit · Anonyme · 8h-2h",color:"#3b82f6"},
     {name:"Tabac Info Service",num:"3989",display:"39 89",desc:"Gratuit · lun-sam 8h-20h",color:"#f97316"},
     {name:"Prevention suicide",num:"3114",display:"31 14",desc:"Gratuit · 24h/24",color:"#a855f7"},
     {name:"SAMU",num:"15",display:"15",desc:"Urgence medicale",color:"#ef4444"},
@@ -819,7 +842,7 @@ function HelpFlipCard(){
         <div style={{fontSize:22,textAlign:"center",marginBottom:10}}>💬</div>
         <div style={{fontSize:14,fontWeight:700,color:"var(--t)",marginBottom:8,textAlign:"center"}}>Parler, ca change tout.</div>
         <p style={{fontSize:12,color:"var(--t2)",lineHeight:1.7,textAlign:"center"}}>Les personnes qui parlent de leur dependance ont deux fois plus de chances de s en sortir durablement. Un appel anonyme peut etre le premier pas.</p>
-        <div style={{fontSize:9,color:"var(--t3)",marginTop:10,textAlign:"center"}}>Tap pour voir les numeros</div>
+
       </div>
     </div>
   </div>;
@@ -1221,7 +1244,31 @@ function MainApp(){
         <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
       </div>
 
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:16,marginBottom:10}}>
+      {/* Stats 30 derniers jours — toujours visible */}
+      {aList.length>0&&(()=>{
+        const today=new Date();
+        const days30=Array.from({length:30},(_,i)=>{
+          const d=new Date(today);d.setDate(d.getDate()-(29-i));
+          const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
+          return data[k]||null;
+        });
+        return <div className="card">
+          <div className="clbl">Consommation — 30 derniers jours</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat("+Math.min(aList.length,3)+",1fr)",gap:8}}>
+            {aList.map(k=>{
+              const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
+              const d=DRUGS[k];
+              return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10}}>
+                <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
+                <div style={{fontSize:20,fontWeight:700,color:total30>0?d.color:"var(--t3)"}}>{total30}</div>
+                <div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{d.unitShort}</div>
+              </div>;
+            })}
+          </div>
+        </div>;
+      })()}
+
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8,marginBottom:10}}>
         <div style={{fontSize:11,fontWeight:600,color:"var(--t2)"}}>Widgets</div>
         <button onClick={()=>setShowWidgets(true)} style={{background:"var(--s)",border:"1px solid var(--b)",borderRadius:8,padding:"4px 10px",color:"var(--t3)",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>Personnaliser</button>
       </div>
@@ -1266,15 +1313,31 @@ function MainApp(){
         {nClean>=goals.target?<div style={{fontSize:11,color:"var(--green2)",fontWeight:600,marginTop:6,textAlign:"center"}}>Objectif atteint ce mois !</div>:<div style={{fontSize:10,color:"var(--t3)",marginTop:5}}>{goals.target-nClean} jour{goals.target-nClean>1?"s":""} restant{goals.target-nClean>1?"s":""}</div>}
       </div>}
 
+      {aList.length>0&&(()=>{
+        const today=new Date();
+        const days30=Array.from({length:30},(_,i)=>{
+          const d=new Date(today);d.setDate(d.getDate()-(29-i));
+          const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
+          return data[k]||null;
+        });
+        return <div className="card">
+          <div className="clbl">Consommation — 30 derniers jours</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat("+Math.min(aList.length,3)+",1fr)",gap:8}}>
+            {aList.map(k=>{
+              const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
+              const d=DRUGS[k];
+              return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10}}>
+                <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
+                <div style={{fontSize:20,fontWeight:700,color:total30>0?d.color:"var(--t3)"}}>{total30}</div>
+                <div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{d.unitShort}</div>
+              </div>;
+            })}
+          </div>
+        </div>;
+      })()}
       <Milestone streak={streak} act={act}/>
 
-      <div className="card">
-        <div className="clbl">Indicateurs educatifs — tap pour details</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          {[{k:"poumons",e:"🫁",n:"Poumons"},{k:"coeur",e:"🫀",n:"Coeur"},{k:"cerveau",e:"🧠",n:"Cerveau"},{k:"foie",e:"🟤",n:"Foie"}].map(o=><OrganCard key={o.k} organKey={o.k} emoji={o.e} name={o.n} streak={streak} act={act} loggedDays={allLogged}/>)}
-        </div>
-        <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",marginTop:8}}>{allLogged<5?"Renseigne encore "+(5-allLogged)+" journee(s)":"Tap = info educative · Source INSERM/OMS"}</div>
-      </div>
+
 
       <DrugTimeline streak={streak} act={act}/>
 
@@ -1327,11 +1390,7 @@ function MainApp(){
         </div>;
       })()}
 
-      {money.total!=="0.00"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)"}}>
-        <div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:4}}>Economies ce mois</div>
-        <div style={{fontSize:28,fontWeight:700,color:"#d8b4fe",marginBottom:8}}>{money.total}€</div>
-        {money.details.map(d=><div key={d.name} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--t2)",marginBottom:3}}><span>{d.emoji} {d.name}</span><span style={{color:"#d8b4fe",fontWeight:600}}>{d.saved}€</span></div>)}
-      </div>}
+      {money.total!=="0.00"&&<MoneyCard money={money}/>}
 
       <div className="card" style={{marginTop:4}}>
         <div className="clbl">A savoir sur chaque substance</div>
@@ -1368,7 +1427,7 @@ function MainApp(){
 
     {/* ═══ CONFIG ═══ */}
     {tab==="goals"&&<div className="tc">
-      <Collapsible title="Substances actives" defaultOpen={true} badge={aList.length+" actives"} icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>}>
+      <Collapsible title="Substances actives" defaultOpen={false} badge={aList.length+" actives"} icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>}>
         {sortedDrugs.map(([k,d])=><div key={k} className={"drug-chip"+(act[k]?" on":"")} onClick={()=>d.warning&&!act[k]?setHelpDrug(k):setAct(prev=>({...prev,[k]:!prev[k]}))}>
           <div style={{fontSize:17,width:26,textAlign:"center"}}>{d.emoji}</div>
           <div style={{flex:1}}>
@@ -1382,8 +1441,17 @@ function MainApp(){
 
       <Collapsible title="Couts et consommation" badge={money.total!=="0.00"?money.total+"€ economies":""} icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}>
         <div style={{fontSize:11,color:"var(--t3)",marginBottom:10}}>Remplis uniquement les substances actives.</div>
-        {aList.includes("tabac")&&[{l:"Cigarettes / jour",k:"cigPerDay",s:1},{l:"Prix paquet (euros)",k:"cigPackCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
-        {aList.includes("cannabis")&&[{l:"Joints / jour",k:"jointsPerDay",s:0.5},{l:"Grammes / joint",k:"weedGPerJoint",s:0.1},{l:"Cannabis / g (euros)",k:"weedGCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
+        {aList.includes("tabac")&&<div style={{background:"var(--s)",borderRadius:10,padding:"10px 12px",marginBottom:8}}>
+          <div style={{fontSize:12,fontWeight:600,color:DRUGS.tabac.color,marginBottom:8}}>{DRUGS.tabac.emoji} {DRUGS.tabac.name}</div>
+          <div className="gr"><span>Cigarettes / jour</span><input type="number" value={goals.cigPerDay||0} onChange={e=>setGoals(p=>({...p,cigPerDay:+e.target.value}))} min="0" step={1}/></div>
+          <div className="gr" style={{marginBottom:0}}><span>Prix paquet (euros)</span><input type="number" value={goals.cigPackCost||0} onChange={e=>setGoals(p=>({...p,cigPackCost:+e.target.value}))} min="0" step={0.5}/></div>
+        </div>}
+        {aList.includes("cannabis")&&<div style={{background:"var(--s)",borderRadius:10,padding:"10px 12px",marginBottom:8}}>
+          <div style={{fontSize:12,fontWeight:600,color:DRUGS.cannabis.color,marginBottom:8}}>{DRUGS.cannabis.emoji} {DRUGS.cannabis.name}</div>
+          <div className="gr"><span>Joints / jour</span><input type="number" value={goals.jointsPerDay||0} onChange={e=>setGoals(p=>({...p,jointsPerDay:+e.target.value}))} min="0" step={0.5}/></div>
+          <div className="gr"><span>Grammes / joint</span><input type="number" value={goals.weedGPerJoint||0} onChange={e=>setGoals(p=>({...p,weedGPerJoint:+e.target.value}))} min="0" step={0.1}/></div>
+          <div className="gr" style={{marginBottom:0}}><span>Cannabis / g (euros)</span><input type="number" value={goals.weedGCost||0} onChange={e=>setGoals(p=>({...p,weedGCost:+e.target.value}))} min="0" step={0.5}/></div>
+        </div>}
         {aList.filter(k=>k!=="tabac"&&k!=="cannabis"&&k!=="porno").map(k=><div key={k} style={{background:"var(--s)",borderRadius:10,padding:"10px 12px",marginBottom:8}}>
           <div style={{fontSize:12,fontWeight:600,color:DRUGS[k].color,marginBottom:8}}>{DRUGS[k].emoji} {DRUGS[k].name}</div>
           <div className="gr"><span>Cout / {DRUGS[k].unitShort} (euros)</span><input type="number" value={goals[k+"_cost"]||DCOST[k]||""} onChange={e=>setGoals(p=>({...p,[k+"_cost"]:+e.target.value}))} min="0"/></div>
@@ -1409,26 +1477,22 @@ function MainApp(){
         {nClean>=goals.target&&<div className="sban">Objectif atteint !</div>}
       </div>
 
-      <Collapsible title="Personnalisation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>}>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <div className="gr" style={{marginBottom:0}}>
-            <span>Mode compact</span>
-            <button className={"toggle"+(goals.compact?" on":" off")} onClick={()=>setGoals(p=>({...p,compact:!p.compact}))}/>
+      <div className="card">
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+          <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
-          <div>
-            <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Rappel quotidien</div>
-            <div className="gr" style={{marginBottom:6}}>
-              <span style={{fontSize:12,color:"var(--t3)"}}>Notification le soir</span>
-              <button className={"toggle"+(goals.notifOn?" on":" off")} onClick={()=>setGoals(p=>({...p,notifOn:!p.notifOn}))}/>
-            </div>
-            {goals.notifOn&&<input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))} style={{width:"100%"}}/>}
-          </div>
-          <div>
-            <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Ma motivation</div>
-            <textarea placeholder="Pourquoi je veux changer..." value={goals.motivation||""} onChange={e=>setGoals(p=>({...p,motivation:e.target.value}))} rows={3} style={{marginTop:0}}/>
-          </div>
+          <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Rappel quotidien</div>
         </div>
-      </Collapsible>
+        <div className="gr" style={{marginBottom:8}}>
+          <span>Notification le soir</span>
+          <button className={"toggle"+(goals.notifOn?" on":" off")} onClick={()=>setGoals(p=>({...p,notifOn:!p.notifOn}))}/>
+        </div>
+        {goals.notifOn&&<div>
+          <div style={{fontSize:11,color:"var(--t3)",marginBottom:6}}>Heure de la notification</div>
+          <input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))}/>
+        </div>}
+      </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
         {[{v:streak+"j",l:"streak",c:"var(--green)"},{v:sc,l:"score",c:scColor},{v:earnedCount,l:"badges",c:"var(--green2)"},{v:longest+"j",l:"record",c:"#a855f7"}].map(s=><div key={s.l} className="card" style={{textAlign:"center",margin:0}}><div style={{fontSize:22,fontWeight:700,color:s.c}}>{s.v}</div><div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{s.l}</div></div>)}

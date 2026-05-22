@@ -1476,41 +1476,43 @@ function MainApp(){
         {money.total!=="0.00"&&<MoneyCard money={money}/>}
 
         {/* Fiche danger par drogue */}
-        <div style={{marginTop:8}}>
-          <div className="clbl" style={{paddingLeft:2}}>À savoir sur chaque substance</div>
-          {aList.map(k=>{
-            const d=DRUGS[k];
-            const dangerInfos={
-              tabac:"Le tabac tue 75 000 personnes par an en France. La nicotine crée une dépendance physique et psychologique puissante en quelques jours. Contient plus de 70 substances cancérigènes.",
-              cannabis:"Usage régulier associé à des troubles de la mémoire, de la motivation et à un risque de dépendance à long terme. Risque accru de psychose chez les personnes prédisposées.",
-              alcool:"3e cause de mortalité en France. Dépendance physique pouvant nécessiter un sevrage médical. Hépatotoxique, neurotoxique, et facteur de risque pour plusieurs cancers.",
-              cocaine:"Risque d'infarctus dans l'heure suivant une prise. Dépendance rapide. Effets sur le cœur, le cerveau et le système cardiovasculaire même lors des premières utilisations.",
-              mdma:"Neurotoxique à doses répétées. Déplétion sérotoninergique pouvant provoquer une dépression sévère post-prise. Hyperthermie potentiellement létale.",
-              amphet:"Troubles cardiovasculaires, psychose amphetaminique, dépendance rapide. Dégrade les neurones dopaminergiques de façon irréversible à hautes doses.",
-              heroine:"Risque vital à chaque prise (overdose). Dépendance physique extrêmement rapide. Arrêt brutal dangereux sans encadrement médical.",
-              ketamine:"Dommages vésicaux irréversibles à usage répété. Dissociation chronique. Risque de dépendance psychologique.",
-              lsd:"Risque de décompensation psychotique chez les personnes prédisposées. HPPD (flashbacks) possible à long terme.",
-              champi:"Risque de bad trip et de crise de panique. Décompensation psychotique possible si prédisposition. Peu de dépendance physique.",
-              crack:"Dépendance la plus rapide connue, parfois dès la première prise. Risque cardiaques, AVC, et crises d'épilepsie.",
-              benzo:"Dépendance en 2 à 4 semaines même à dose thérapeutique. Arrêt brutal potentiellement fatal. Sevrage à réduire progressivement sous supervision médicale.",
-              meth:"Destruction massive des neurones dopaminergiques. Psychose quasi systématique. Dégradation physique rapide et visible.",
-              poppers:"Rétinopathie avec usage intensif. Interaction mortelle avec le Viagra. Hypotension brutale.",
-              ghb:"Fenêtre thérapeutique très étroite — la dose récréative est proche de la dose létale. Amnésie et perte de conscience fréquentes.",
-              proto:"Neuropathie liée à la destruction de la vitamine B12. Peut être irréversible. Frostbite des voies aériennes.",
-              porno:"Désensibilisation progressive aux stimuli naturels. Impact sur les relations et l'estime de soi. Peut masquer une anxiété sociale ou une dépression sous-jacente.",
-            };
-            return<div key={k} style={{marginBottom:8,background:"var(--s)",borderRadius:12,padding:"12px 14px",border:"1px solid var(--b)"}}>
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <span style={{fontSize:18}}>{d.emoji}</span>
-                <div>
-                  <span style={{fontSize:13,fontWeight:600,color:d.color}}>{d.name}</span>
-                  <span style={{fontSize:10,marginLeft:8,padding:"1px 7px",borderRadius:8,background:`${d.riskColor}22`,color:d.riskColor,fontWeight:600}}>{d.risk}</span>
+        {(()=>{
+          const DANGER_INFO={
+            tabac:"Le tabac tue 75 000 personnes par an en France. La nicotine crée une dépendance physique et psychologique puissante en quelques jours. Contient plus de 70 substances cancérigènes.",
+            cannabis:"Usage régulier associé à des troubles de la mémoire et de la motivation. Risque accru de psychose chez les personnes prédisposées.",
+            alcool:"3e cause de mortalité en France. Dépendance physique nécessitant parfois un sevrage médical. Hépatotoxique, neurotoxique.",
+            cocaine:"Risque cardiovasculaire majeur même lors des premières utilisations. Dépendance rapide.",
+            mdma:"Neurotoxique à doses répétées. Hyperthermie potentiellement létale. Dépression sérotoninergique post-prise.",
+            amphet:"Troubles cardiovasculaires, dépendance rapide. Dégrade les neurones dopaminergiques à hautes doses.",
+            heroine:"Risque vital à chaque prise. Dépendance physique extrêmement rapide. Arrêt brutal dangereux sans encadrement médical.",
+            ketamine:"Dommages vésicaux irréversibles à usage répété. Dissociation chronique.",
+            lsd:"Risque de décompensation psychotique. Flashbacks possibles à long terme.",
+            champi:"Risque de bad trip et de crise de panique. Peu de dépendance physique.",
+            crack:"Dépendance parmi les plus rapides connues. Risques cardiaques, AVC et crises épileptiques.",
+            benzo:"Dépendance en 2 à 4 semaines. Arrêt brutal potentiellement fatal. Sevrage médical obligatoire.",
+            meth:"Destruction massive des neurones dopaminergiques. Psychose quasi systématique.",
+            poppers:"Rétinopathie avec usage intensif. Interaction mortelle avec certains médicaments.",
+            ghb:"Dose létale très proche de la dose récréative. Amnésie et perte de conscience fréquentes.",
+            proto:"Neuropathie liée au déficit en vitamine B12. Peut être irréversible.",
+            porno:"Désensibilisation progressive. Impact sur les relations. Peut masquer une anxiété sous-jacente.",
+          };
+          return<div style={{marginTop:8}}>
+            <div className="clbl" style={{paddingLeft:2}}>À savoir sur chaque substance</div>
+            {aList.map(k=>{
+              const d=DRUGS[k];
+              return<div key={k} style={{marginBottom:8,background:"var(--s)",borderRadius:12,padding:"12px 14px",border:"1px solid var(--b)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <span style={{fontSize:18}}>{d.emoji}</span>
+                  <div>
+                    <span style={{fontSize:13,fontWeight:600,color:d.color}}>{d.name}</span>
+                    <span style={{fontSize:10,marginLeft:8,padding:"1px 7px",borderRadius:8,background:d.riskColor+"22",color:d.riskColor,fontWeight:600}}>{d.risk}</span>
+                  </div>
                 </div>
-              </div>
-              <p style={{fontSize:11,color:"var(--t2)",lineHeight:1.6}}>{dangerInfos[k]||"Substance psychoactive. Usage prolongé peut créer une dépendance physique ou psychologique."}</p>
-            </div>;
-          })}
-        </div>
+                <p style={{fontSize:11,color:"var(--t2)",lineHeight:1.6}}>{DANGER_INFO[k]||"Usage prolongé peut créer une dépendance."}</p>
+              </div>;
+            })}
+          </div>;
+        })()}
 
       </div>}
 

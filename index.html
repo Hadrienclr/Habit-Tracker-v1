@@ -183,6 +183,7 @@
     .field-label{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
     .field-input{width:100%;background:var(--s);border:1.5px solid var(--b);border-radius:12px;padding:13px 14px;font-size:16px;color:var(--t);font-family:inherit;outline:none;transition:border-color .2s;}
     .field-input:focus{border-color:rgba(34,197,94,0.5);}
+    @keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
   </style>
 </head>
 <body>
@@ -202,15 +203,15 @@ const DEF_COST={alcool:3,cocaine:10,mdma:15,amphet:10,heroine:30,ketamine:20,lsd
 // ── Base drogues ──────────────────────────────────────────────────────────────
 const DRUGS={
   tabac:{name:"Tabac",emoji:"🚬",color:"#f97316",risk:"Élevé",riskColor:"#f97316",unit:"cigarettes",unitShort:"cig",on:true,
-    rec:[{t:"48h",d:"Nicotine éliminée",days:2},{t:"72h",d:"Bronches dilatées",days:3},{t:"1 sem.",d:"Circulation améliorée",days:7},{t:"1 mois",d:"Risque cardio en baisse",days:30},{t:"3 mois",d:"+30% capacité pulmonaire",days:90}],
+    rec:[{t:"20 min",d:"Tension artérielle normalisée",days:0},{t:"8h",d:"CO sanguin divisé par deux",days:0},{t:"48h",d:"Nicotine entièrement éliminée",days:2},{t:"72h",d:"Bronches dilatées, respiration plus facile",days:3},{t:"1 sem.",d:"Circulation sanguine améliorée, énergie en hausse",days:7},{t:"2 sem.",d:"Toux productive — les poumons se nettoient",days:14},{t:"1 mois",d:"Risque cardiovasculaire en baisse",days:30},{t:"3 mois",d:"+30% de capacité pulmonaire",days:90},{t:"6 mois",d:"Infections respiratoires moins fréquentes",days:180},{t:"1 an",d:"Risque d'infarctus divisé par deux",days:365},{t:"5 ans",d:"Risque d'AVC identique à un non-fumeur",days:1825},{t:"10 ans",d:"Risque de cancer du poumon divisé par deux",days:3650},{t:"15 ans",d:"Risque cardiaque identique à un non-fumeur — sevrage complet",days:5475}],
     organs:{poumons:80,coeur:70,cerveau:55,foie:15},
     ot:{poumons:{low:"Les goudrons réduisent la capacité pulmonaire.",mid:"Cils bronchiques en repousse.",high:"Poumons en bonne progression."},coeur:{low:"Risque cardiovasculaire augmenté.",mid:"Pression artérielle en normalisation.",high:"Risque en baisse."},cerveau:{low:"Forte dépendance à la nicotine.",mid:"Récepteurs en désensibilisation.",high:"Circuits en récupération."},foie:{low:"Légère exposition.",mid:"Élimination progressive.",high:"Peu affecté."}}},
   cannabis:{name:"Cannabis",emoji:"🍃",color:"#a855f7",risk:"Modéré",riskColor:"#a855f7",unit:"joints",unitShort:"joint",on:true,gramPerUnit:0.3,
-    rec:[{t:"72h",d:"THC sanguin en baisse",days:3},{t:"1 sem.",d:"Sommeil profond restauré",days:7},{t:"1 mois",d:"Endocannabinoïde rétabli",days:30},{t:"3 mois",d:"Cognition restaurée",days:90}],
+    rec:[{t:"72h",d:"THC sanguin commence à baisser",days:3},{t:"1 sem.",d:"Sommeil profond restauré, rêves plus intenses",days:7},{t:"2 sem.",d:"Mémoire à court terme en amélioration",days:14},{t:"1 mois",d:"Système endocannabinoïde rétabli",days:30},{t:"3 mois",d:"Cognition et motivation restaurées — sevrage établi",days:90},{t:"6 mois",d:"Créativité et concentration au naturel",days:180},{t:"1 an",d:"Récupération neurologique complète",days:365}],
     organs:{poumons:70,coeur:30,cerveau:85,foie:20},
     ot:{poumons:{low:"4× plus de goudron que le tabac.",mid:"Inflammation bronchique en régression.",high:"En bonne progression."},coeur:{low:"Tachycardie post-prise.",mid:"Fréquence cardiaque se normalise.",high:"Impact limité."},cerveau:{low:"THC altère mémoire et motivation.",mid:"Endocannabinoïde se rééquilibre.",high:"Cognition en récupération."},foie:{low:"Légère surcharge.",mid:"Foie élimine le THC.",high:"Peu affecté."}}},
   alcool:{name:"Alcool",emoji:"🍺",color:"#3b82f6",risk:"Modéré",riskColor:"#3b82f6",unit:"verres",unitShort:"verre",on:true,
-    rec:[{t:"72h",d:"Pic sevrage (surveillance si dépendant)",days:3},{t:"1 sem.",d:"Sommeil restauré",days:7},{t:"1 mois",d:"Foie partiellement régénéré",days:30},{t:"6 mois",d:"Récupération établie",days:180}],
+    rec:[{t:"24h",d:"Foie commence à éliminer les métabolites",days:1},{t:"72h",d:"Pic du sevrage — surveillance médicale recommandée si dépendant",days:3},{t:"1 sem.",d:"Sommeil et hydratation restaurés",days:7},{t:"2 sem.",d:"Tension artérielle normalisée",days:14},{t:"1 mois",d:"Foie partiellement régénéré, enzymes en baisse",days:30},{t:"3 mois",d:"Cognition et mémoire en amélioration",days:90},{t:"6 mois",d:"Récupération hépatique établie",days:180},{t:"1 an",d:"Risque de certains cancers en baisse significative",days:365},{t:"5 ans",d:"Risque hépatique proche d'un non-buveur",days:1825}],
     organs:{poumons:15,coeur:60,cerveau:70,foie:95},
     ot:{poumons:{low:"Fragilise l'immunité pulmonaire.",mid:"En diminution.",high:"Peu affectés."},coeur:{low:"Arythmies possibles.",mid:"Rythme cardiaque se stabilise.",high:"En bonne progression."},cerveau:{low:"Altération mémoire et jugement.",mid:"Neurotransmetteurs en rééquilibrage.",high:"Cognition en progression."},foie:{low:"Stéatose hépatique possible à terme.",mid:"Foie se régénère.",high:"En bonne progression."}}},
   cocaine:{name:"Cocaïne",emoji:"🤍",color:"#e5e7eb",risk:"Très élevé",riskColor:"#ef4444",unit:"lignes",unitShort:"ligne",on:false,
@@ -373,6 +374,232 @@ const IcMo=Ic('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1=
 const IcSe=Ic('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="20"/>',12);
 const IcYe=Ic('<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="14" x2="21" y2="14"/>',12);
 const IcGrip=()=><svg width={16} height={16} viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7" r="1.5"/><circle cx="15" cy="7" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="17" r="1.5"/><circle cx="15" cy="17" r="1.5"/></svg>;
+
+
+
+
+// ── HelpFlipCard — carte flip besoin d'aide ──────────────────────────────────
+function HelpFlipCard(){
+  const [flipped,setFlipped]=useState(false);
+  const nums=[
+    {name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit · Anonyme · 24h/24 · 7j/7",color:"#fb923c"},
+    {name:"Alcool Info Service",num:"0 980 980 930",desc:"Gratuit · Anonyme · 8h-2h",color:"#3b82f6"},
+    {name:"Tabac Info Service",num:"3989",desc:"Gratuit · lun-sam 8h-20h",color:"#f97316"},
+    {name:"Prévention suicide",num:"3114",desc:"Gratuit · 24h/24 · 7j/7",color:"#a855f7"},
+    {name:"SAMU",num:"15",desc:"Urgence médicale",color:"#ef4444"},
+  ];
+  return<div style={{perspective:1000,marginBottom:10,cursor:"pointer"}} onClick={()=>setFlipped(f=>!f)}>
+    <div style={{position:"relative",minHeight:120,transition:"transform .6s cubic-bezier(.4,0,.2,1)",transformStyle:"preserve-3d",transform:flipped?"rotateY(180deg)":"rotateY(0deg)"}}>
+      {/* Face avant — numéros */}
+      <div style={{position:flipped?"absolute":"relative",inset:0,backfaceVisibility:"hidden",WebkitBackfaceVisibility:"hidden",background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.18)",borderRadius:16,padding:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div style={{fontSize:10,color:"#fb923c",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase"}}>Besoin d'aide</div>
+          <div style={{fontSize:9,color:"#fb923c",opacity:0.7}}>Tap →</div>
+        </div>
+        {nums.map(n=><a key={n.num} href={`tel:${n.num.replace(/\s/g,"")}`} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:10,paddingBottom:9,marginBottom:9,borderBottom:"1px solid rgba(249,115,22,0.1)",textDecoration:"none"}}>
+          <div style={{minWidth:64,padding:"8px 6px",borderRadius:9,background:n.color+"18",border:`1px solid ${n.color}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+            <span style={{fontSize:11,fontWeight:800,color:n.color,letterSpacing:".04em"}}>{n.num}</span>
+          </div>
+          <div style={{flex:1}}><div style={{fontSize:11,fontWeight:600,color:"var(--t)"}}>{n.name}</div><div style={{fontSize:9,color:"var(--t3)",marginTop:1}}>{n.desc}</div></div>
+        </a>)}
+        <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>Ces services sont confidentiels et gratuits.</div>
+      </div>
+      {/* Face arrière — message d'importance */}
+      <div style={{position:"absolute",inset:0,backfaceVisibility:"hidden",WebkitBackfaceVisibility:"hidden",transform:"rotateY(180deg)",background:"rgba(168,85,247,0.08)",border:"1px solid rgba(168,85,247,0.2)",borderRadius:16,padding:18,display:"flex",flexDirection:"column",justifyContent:"center"}}>
+        <div style={{fontSize:22,textAlign:"center",marginBottom:10}}>💬</div>
+        <div style={{fontSize:14,fontWeight:700,color:"var(--t)",marginBottom:8,textAlign:"center"}}>Parler, ça change tout.</div>
+        <p style={{fontSize:12,color:"var(--t2)",lineHeight:1.7,textAlign:"center"}}>Les personnes qui parlent de leur dépendance ont deux fois plus de chances de s'en sortir durablement. Un appel anonyme peut être le premier pas.</p>
+        <div style={{fontSize:9,color:"var(--t3)",marginTop:10,textAlign:"center"}}>Tap pour voir les numéros</div>
+      </div>
+    </div>
+  </div>;
+}
+
+
+// ── CollapsibleCard — menu déroulant générique ───────────────────────────────
+function CollapsibleCard({title,icon,badge,children,defaultOpen=false}){
+  const [open,setOpen]=useState(defaultOpen);
+  return<div className="card" style={{marginBottom:10}}>
+    <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+      <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}>{icon}</div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>{title}</div>
+        {badge&&<div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{badge}</div>}
+      </div>
+      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--t3)" strokeWidth="2" strokeLinecap="round" style={{transform:open?"rotate(180deg)":"rotate(0deg)",transition:"transform .2s"}}><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    {open&&<div style={{marginTop:12,paddingTop:12,borderTop:"1px solid var(--b)"}}>{children}</div>}
+  </div>;
+}
+
+
+// ── Pool de faits éducatifs ───────────────────────────────────────────────────
+const FACTS = [
+  "Après 20 minutes sans tabac, ta tension artérielle revient à la normale.",
+  "En 8 heures sans cigarette, le taux de CO dans ton sang diminue de moitié.",
+  "À 48h sans nicotine, les terminaisons nerveuses commencent à se régénérer.",
+  "Après 72h sans fumer, respirer devient physiquement plus facile.",
+  "En 1 semaine clean, ta circulation sanguine s'améliore de façon mesurable.",
+  "Le cerveau commence à recâbler ses circuits de récompense dès le premier jour sans substance.",
+  "Après 2 semaines, la mémoire à court terme s'améliore progressivement.",
+  "30 jours sans alcool permettent au foie de commencer à se régénérer.",
+  "À 3 mois sans tabac, la capacité pulmonaire augmente d'environ 30%.",
+  "Le système immunitaire se renforce à partir de la première semaine de sevrage.",
+  "Après 1 mois clean, les nuits de sommeil profond augmentent de façon notable.",
+  "Le THC du cannabis reste jusqu'à 30 jours dans les tissus graisseux.",
+  "En 6 mois sans alcool, le risque d'hypertension diminue de façon significative.",
+  "La dopamine retrouve progressivement son niveau naturel en quelques semaines.",
+  "Après 90 jours, le risque cardiaque lié au tabac commence à baisser.",
+  "En 1 an sans fumer, le risque d'infarctus est réduit de moitié.",
+  "Le cerveau produit naturellement de l'endorphine — les substances en bloquent ce mécanisme.",
+  "Chaque heure sans consommer modifie la chimie de ton cerveau dans le bon sens.",
+  "La sérotonine, molécule du bien-être, se rééquilibre progressivement sans substances.",
+  "Après 2 semaines sans cannabis, la motivation naturelle commence à revenir.",
+  "Le corps élimine la nicotine en 72h mais le cerveau se recalibre sur 3 mois.",
+  "Boire de l'eau aide le corps à éliminer les toxines liées au sevrage.",
+  "L'exercice physique stimule la production naturelle de dopamine sans substances.",
+  "En 6 semaines clean, les circuits de plaisir naturels se renforcent.",
+  "La qualité du sommeil s'améliore en moyenne dès la 2e semaine sans substances.",
+  "Après 180 jours sans alcool, la récupération hépatique est souvent complète.",
+  "Le cerveau est l'organe le plus plastique du corps — il se reconstruit.",
+  "Parler de sa dépendance à quelqu'un réduit de 40% le risque de rechute.",
+  "Chaque journée renseignée dans l'app renforce la prise de conscience.",
+  "La rechute fait partie du parcours — ce n'est pas un échec, c'est une information.",
+  "Après 1 an sans tabac, les poumons peuvent retrouver une capacité quasi normale.",
+  "Le manque physique dure en général 3 à 5 jours — le reste est psychologique.",
+];
+
+// ── Composant FactCard avec effet typewriter ──────────────────────────────────
+function FactCard({streak,act}){
+  const [displayed,setDisplayed]=useState('');
+  const [factIdx,setFactIdx]=useState(0);
+  const timerRef=useRef(null);
+  const charRef=useRef(0);
+
+  // Choisir un fait adapté au streak
+  const getFact=useCallback(()=>{
+    // Facts spécifiques au streak
+    const byStreak=streak>=365?[0,14,16,30]:streak>=90?[8,9,14,15]:streak>=30?[7,11,12,13]:streak>=14?[6,11,18,24]:streak>=7?[4,5,9,23]:streak>=3?[2,3,20,21]:[17,27,28,29];
+    const pool=[...byStreak,...Array.from({length:5},(_,i)=>Math.floor(Math.random()*FACTS.length))];
+    return pool[factIdx%pool.length];
+  },[streak,factIdx]);
+
+  useEffect(()=>{
+    const idx=getFact();
+    const text=FACTS[idx%FACTS.length];
+    charRef.current=0;
+    setDisplayed('');
+    clearInterval(timerRef.current);
+    timerRef.current=setInterval(()=>{
+      charRef.current++;
+      setDisplayed(text.slice(0,charRef.current));
+      if(charRef.current>=text.length) clearInterval(timerRef.current);
+    },28);
+    return()=>clearInterval(timerRef.current);
+  },[factIdx,streak]);
+
+  return<div className="card" style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.2)",cursor:"pointer"}} onClick={()=>setFactIdx(f=>f+1)}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+      <div style={{fontSize:9,color:"var(--green)",fontWeight:700,letterSpacing:".08em",textTransform:"uppercase"}}>Fait éducatif</div>
+      <div style={{fontSize:9,color:"var(--green2)",opacity:0.7}}>Tap pour suivant →</div>
+    </div>
+    <p style={{fontSize:12,color:"var(--t)",lineHeight:1.6,fontStyle:"italic",minHeight:36}}>{displayed}<span style={{opacity:0.5,animation:"blink 1s infinite"}}>|</span></p>
+  </div>;
+}
+
+
+
+// ── PieStats — camembert SVG par drogue ──────────────────────────────────────
+function PieStats({data,act,aList}){
+  const today=new Date();
+  // Calculer sur les 30 derniers jours
+  const days30=Array.from({length:30},(_,i)=>{
+    const d=new Date(today);d.setDate(d.getDate()-(29-i));
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    return data[k]||null;
+  });
+  const logged30=days30.filter(Boolean).length;
+  const clean30=days30.filter(e=>e&&isClean(e,act)).length;
+  const conso30={};
+  aList.forEach(k=>{conso30[k]=days30.filter(e=>e&&(e[k]||0)>0).length;});
+
+  function PieChart({cleanDays,consoDays,total,color,name,emoji}){
+    if(total===0)return<div style={{textAlign:"center",color:"var(--t3)",fontSize:11}}>Pas de données</div>;
+    const r=38,cx=50,cy=50,circ=2*Math.PI*r;
+    const cleanPct=cleanDays/total;
+    const consoPct=consoDays/total;
+    const restPct=1-cleanPct-consoPct;
+    // Arcs SVG
+    function arc(startPct,pct,col){
+      if(pct<=0)return null;
+      const s=startPct*2*Math.PI-Math.PI/2;
+      const e=(startPct+pct)*2*Math.PI-Math.PI/2;
+      const x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s);
+      const x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);
+      const large=pct>0.5?1:0;
+      return<path d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`} fill={col}/>;
+    }
+    return<div style={{display:"flex",alignItems:"center",gap:14}}>
+      <svg width={80} height={80} viewBox="0 0 100 100" style={{flexShrink:0}}>
+        <circle cx={cx} cy={cy} r={r} fill="var(--s2)"/>
+        {arc(0,cleanPct,"#22c55e")}
+        {arc(cleanPct,consoPct,color)}
+        {arc(cleanPct+consoPct,restPct,"var(--b2)")}
+        <circle cx={cx} cy={cy} r={22} fill="var(--bg2)"/>
+        <text x={cx} y={cy-5} textAnchor="middle" fontSize="14" fontWeight="700" fill="#22c55e">{Math.round(cleanPct*100)}%</text>
+        <text x={cx} y={cy+10} textAnchor="middle" fontSize="9" fill="var(--t3)">clean</text>
+      </svg>
+      <div style={{flex:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}><span style={{fontSize:16}}>{emoji}</span><span style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>{name}</span></div>
+        <div style={{display:"flex",flexDirection:"column",gap:3}}>
+          <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:8,height:8,borderRadius:2,background:"#22c55e",flexShrink:0}}/><span style={{fontSize:11,color:"var(--t2)"}}>{cleanDays}j clean sur 30</span></div>
+          {consoDays>0&&<div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:8,height:8,borderRadius:2,background:color,flexShrink:0}}/><span style={{fontSize:11,color:"var(--t2)"}}>{consoDays}j avec consommation</span></div>}
+          <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:8,height:8,borderRadius:2,background:"var(--b2)",flexShrink:0}}/><span style={{fontSize:11,color:"var(--t3)"}}>{total-cleanDays-consoDays}j non renseignés</span></div>
+        </div>
+      </div>
+    </div>;
+  }
+
+  return<div style={{display:"flex",flexDirection:"column",gap:14}}>
+    <PieChart cleanDays={clean30} consoDays={logged30-clean30} total={30} color="#f97316" name="Ensemble" emoji="✦"/>
+    {aList.map(k=>{
+      const d=DRUGS[k];
+      const consoDays30=days30.filter(e=>e&&(e[k]||0)>0).length;
+      const cleanDays30=days30.filter(e=>e&&isClean(e,act)&&(e[k]||0)===0&&e.logged).length;
+      return<PieChart key={k} cleanDays={days30.filter(e=>e&&e.logged&&(e[k]||0)===0).length} consoDays={consoDays30} total={30} color={d.color} name={d.name} emoji={d.emoji}/>;
+    })}
+    <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>Basé sur les 30 derniers jours</div>
+  </div>;
+}
+
+
+
+// ── MoneyCard — économies cliquables avec détail par drogue ──────────────────
+function MoneyCard({money}){
+  const [open,setOpen]=useState(false);
+  return<>
+    <div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)",cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:3}}>Économies ce mois</div>
+          <div style={{fontSize:28,fontWeight:700,color:"#d8b4fe"}}>{money.total}€</div>
+        </div>
+        <div style={{fontSize:9,color:"#a855f7",opacity:0.8}}>{open?"▲ Réduire":"▼ Détail"}</div>
+      </div>
+      {open&&<div style={{marginTop:12,paddingTop:12,borderTop:"1px solid rgba(168,85,247,0.15)"}}>
+        {money.details.length>0?money.details.map(d=><div key={d.name} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,padding:"8px 10px",background:"rgba(168,85,247,0.08)",borderRadius:9}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:16}}>{d.emoji}</span>
+            <span style={{fontSize:12,fontWeight:500,color:"var(--t)"}}>{d.name}</span>
+          </div>
+          <span style={{fontSize:14,fontWeight:700,color:"#d8b4fe"}}>{d.saved}€</span>
+        </div>):<div style={{fontSize:11,color:"var(--t3)",textAlign:"center",padding:"8px 0"}}>Configure tes coûts dans les réglages pour voir le détail.</div>}
+        <div style={{fontSize:10,color:"var(--t3)",marginTop:4,textAlign:"center"}}>Basé sur les journées clean renseignées ce mois</div>
+      </div>}
+    </div>
+  </>;
+}
+
 
 // ── Small components ──────────────────────────────────────────────────────────
 function Bar({pct,color,thick}){const r=useRef(null);useEffect(()=>{if(!r.current)return;r.current.style.width="0%";const t=setTimeout(()=>{if(r.current)r.current.style.width=pct+"%";},80);return()=>clearTimeout(t);},[pct]);return<div className={`pb${thick?" t":""}`}><div ref={r} className="pf" style={{background:color}}/></div>;}
@@ -551,20 +778,57 @@ function DrugTimeline({streak,act}){
 
 // ── Next Milestone ────────────────────────────────────────────────────────────
 function Milestone({streak,act}){
+  const [open,setOpen]=useState(false);
   const primary=Object.keys(act).find(k=>act[k]&&DRUGS[k]?.rec?.length>0);
   if(!primary)return null;
   const steps=DRUGS[primary].rec,d=DRUGS[primary];
   const next=steps.find(s=>s.days>streak),prev=steps.filter(s=>s.days<=streak).pop();
-  if(!next)return<div className="milestone-card"><div className="mg"/><div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>🎉 Objectif atteint</div><div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Continue comme ça, c'est remarquable.</div></div>;
-  const pct=prev?Math.round(((streak-prev.days)/(next.days-prev.days))*100):Math.round((streak/Math.max(next.days,1))*100);
-  const left=next.days-streak;
-  return<div className="milestone-card"><div className="mg"/>
-    <div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Prochain cap — {next.t}</div>
-    <div style={{fontSize:15,fontWeight:600,color:"var(--t)",marginBottom:4}}>{next.d}</div>
-    <div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}>{d.name} · <span style={{color:d.color,fontWeight:600}}>{left} jour{left>1?"s":""}</span></div>
-    <Bar pct={Math.max(pct,3)} color="linear-gradient(90deg,#22c55e,#4ade80)"/>
-    <div style={{fontSize:10,color:"var(--green2)",fontWeight:600,marginTop:5}}>{pct}% vers ce cap</div>
-  </div>;
+  const pct=next?(prev?Math.round(((streak-prev.days)/(next.days-prev.days))*100):Math.round((streak/Math.max(next.days,1))*100)):100;
+  const left=next?next.days-streak:0;
+  const allActive=Object.keys(act).filter(k=>act[k]&&DRUGS[k]?.rec?.length>0);
+  return<>
+    <div className="milestone-card" style={{cursor:"pointer"}} onClick={()=>setOpen(true)}>
+      <div className="mg"/>
+      {!next?<>
+        <div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>🎉 Objectif atteint</div>
+        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Continue comme ça, c'est remarquable.</div>
+      </>:<>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Prochain cap — {next.t}</div>
+            <div style={{fontSize:15,fontWeight:600,color:"var(--t)",marginBottom:4}}>{next.d}</div>
+            <div style={{fontSize:12,color:"var(--t2)",marginBottom:10}}>{d.name} · <span style={{color:d.color,fontWeight:600}}>{left} jour{left>1?"s":""}</span></div>
+          </div>
+          <div style={{fontSize:9,color:"var(--green2)",opacity:0.7,flexShrink:0,marginLeft:8}}>Voir tout →</div>
+        </div>
+        <Bar pct={Math.max(pct,3)} color="linear-gradient(90deg,#22c55e,#4ade80)"/>
+        <div style={{fontSize:10,color:"var(--green2)",fontWeight:600,marginTop:5}}>{pct}% vers ce cap</div>
+      </>}
+    </div>
+    {open&&<div className="mo" onClick={()=>setOpen(false)}>
+      <div className="mb" onClick={e=>e.stopPropagation()}>
+        <div className="mh" onClick={()=>setOpen(false)}/>
+        <div style={{fontSize:15,fontWeight:700,color:"var(--t)",marginBottom:14}}>Prochains caps</div>
+        {allActive.map(k=>{
+          const dd=DRUGS[k],st=DRUGS[k].rec;
+          const nx=st.find(s=>s.days>streak);
+          const pv=st.filter(s=>s.days<=streak).pop();
+          const pc=nx?(pv?Math.round(((streak-pv.days)/(nx.days-pv.days))*100):Math.round((streak/Math.max(nx.days,1))*100)):100;
+          return<div key={k} style={{marginBottom:14,paddingBottom:14,borderBottom:"1px solid var(--b)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{fontSize:18}}>{dd.emoji}</span>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:dd.color}}>{dd.name}</div>
+                <div style={{fontSize:10,color:"var(--t3)"}}>{nx?`→ ${nx.t} : ${nx.d}`:"Objectif atteint !"}</div>
+              </div>
+            </div>
+            <Bar pct={Math.max(pc,2)} color={dd.color}/>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3}}>{pc}% · {SEV[k]}j objectif total</div>
+          </div>;
+        })}
+      </div>
+    </div>}
+  </>;
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────────
@@ -890,12 +1154,12 @@ function Onboarding({onComplete}){
           <div style={{fontSize:12,color:"#fb923c",lineHeight:1.5}}>{DRUGS[obWarningDrug]?.warning?.replace("⚠️ ","")}</div>
         </div>
         <div style={{fontSize:11,fontWeight:600,color:"var(--t)",marginBottom:10}}>Numéros d'aide gratuits et anonymes</div>
-        {[{name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",desc:"Urgence médicale"}].map(n=><div key={n.num} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)"}}>
-          <div style={{minWidth:80,padding:"8px 4px",borderRadius:10,background:"rgba(249,115,22,0.15)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:12,fontWeight:700,color:"#fb923c"}}>{n.num}</span>
+        {[{name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",desc:"Urgence médicale"}].map(n=><a key={n.num} href={`tel:${n.num.replace(/\s/g,"")}`} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)",textDecoration:"none"}}>
+          <div style={{minWidth:72,padding:"10px 8px",borderRadius:10,background:"rgba(249,115,22,0.15)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <span style={{fontSize:11,fontWeight:800,color:"#fb923c",letterSpacing:".04em"}}>{n.num}</span>
           </div>
-          <div><div style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{n.name}</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{n.desc}</div></div>
-        </div>)}
+          <div style={{flex:1}}><div style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{n.name}</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{n.desc}</div><div style={{fontSize:9,color:"#fb923c",fontWeight:600,marginTop:2}}>Appuyer pour appeler →</div></div>
+        </a>)}
         <div style={{display:"flex",gap:8,marginTop:8}}>
           <button onClick={()=>setObWarningDrug(null)} style={{flex:1,padding:"11px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Annuler</button>
           <button onClick={()=>{setSelDrugs(p=>({...p,[obWarningDrug]:true}));setObWarningDrug(null);}} style={{flex:2,padding:"11px",borderRadius:10,background:"rgba(34,197,94,0.15)",border:"1.5px solid rgba(34,197,94,0.3)",color:"var(--green2)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Ajouter quand même</button>
@@ -1122,7 +1386,7 @@ function MainApp(){
           </div></div>}
           {w.id==="milestone"&&<Milestone streak={streak} act={act}/>}
           {w.id==="money"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",borderColor:"rgba(168,85,247,0.18)"}}><div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:3}}>Économies ce mois</div><div style={{fontSize:30,fontWeight:700,color:"#d8b4fe"}}>{money.total}€</div>{money.details.map(d=><div key={d.name} style={{fontSize:10,color:"var(--t3)",marginTop:2}}>{d.emoji} {d.name} : {d.saved}€</div>)}</div>}
-          {w.id==="fact"&&<div className="card" style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.2)"}}><div style={{fontSize:9,color:"var(--green)",fontWeight:700,marginBottom:5,letterSpacing:".08em",textTransform:"uppercase"}}>Fait éducatif</div><p style={{fontSize:12,color:"var(--t)",lineHeight:1.6,fontStyle:"italic"}}>{streak>=90?"90j : capacité pulmonaire améliorée, risque cardio en baisse.":streak>=30?"30j : foie en régénération, dopamine en récupération.":streak>=14?"2 sem. : mémoire à court terme en amélioration.":streak>=7?"7j : circulation sanguine améliorée.":streak>=3?"72h : substances en élimination, SNC se recalibre.":"Chaque heure sans consommer modifie la chimie du cerveau."}</p></div>}
+          {w.id==="fact"&&<FactCard streak={streak} act={act}/>}
         </React.Fragment>)}
       </div>}
 
@@ -1139,15 +1403,20 @@ function MainApp(){
           <div style={{marginTop:10}}><Bar pct={sc} color={`linear-gradient(90deg,${scColor},${scColor}66)`} thick/></div>
         </div>
 
+        {/* Objectif mensuel */}
+        {goals.target>0&&<div className="card" style={{background:"linear-gradient(135deg,rgba(34,197,94,0.08),rgba(168,85,247,0.04))",border:"1px solid rgba(34,197,94,0.2)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div style={{fontSize:11,color:"var(--green2)",fontWeight:600}}>Objectif mensuel</div>
+            <div style={{fontSize:11,fontWeight:700,color:nClean>=goals.target?"#22c55e":"var(--t2)"}}>{nClean}/{goals.target} jours</div>
+          </div>
+          <Bar pct={Math.min((nClean/Math.max(goals.target,1))*100,100)} color="linear-gradient(90deg,#22c55e,#4ade80)" thick/>
+          {nClean>=goals.target
+            ?<div style={{fontSize:11,color:"var(--green2)",fontWeight:600,marginTop:6,textAlign:"center"}}>🎉 Objectif atteint ce mois !</div>
+            :<div style={{fontSize:10,color:"var(--t3)",marginTop:5}}>{goals.target-nClean} jour{goals.target-nClean>1?"s":""} restant{goals.target-nClean>1?"s":""} pour atteindre l'objectif</div>}
+        </div>}
         <Milestone streak={streak} act={act}/>
 
-        <div className="card">
-          <div className="clbl">Indicateurs éducatifs — tap pour détails</div>
-          <div className="organ-grid">
-            {[{k:"poumons",e:"🫁",n:"Poumons"},{k:"coeur",e:"🫀",n:"Cœur"},{k:"cerveau",e:"🧠",n:"Cerveau"},{k:"foie",e:"🟤",n:"Foie"}].map(o=><OrganCard key={o.k} organKey={o.k} emoji={o.e} name={o.n} streak={streak} act={act} loggedDays={allLogged}/>)}
-          </div>
-          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center"}}>Tap sur un organe pour les infos éducatives</div>
-        </div>
+
 
         <DrugTimeline streak={streak} act={act}/>
 
@@ -1156,13 +1425,9 @@ function MainApp(){
           <Chart spark={spark}/>
         </div>
 
-        <div className="xcard">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div className="clbl" style={{margin:0}}>Par semaine</div>
-            <button className="xbtn" onClick={()=>setExpand("weekly")}><IcExp/></button>
-          </div>
-          <div style={{marginBottom:9}}><div style={{fontSize:9,color:"var(--green)",fontWeight:600,marginBottom:4}}>✦ Jours clean</div><WBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
-          {aList.map(k=><div key={k} style={{marginBottom:9}}><div style={{fontSize:9,color:DRUGS[k]?.color,fontWeight:600,marginBottom:4}}>{DRUGS[k]?.emoji} {DRUGS[k]?.name}</div><WBars weeks={weeklyData} metric={k} color={DRUGS[k]?.color}/></div>)}
+        <div className="card">
+          <div className="clbl">Moyenne 30 derniers jours</div>
+          <PieStats data={data} act={act} aList={aList}/>
         </div>
 
         {/* Stats humeur */}
@@ -1208,7 +1473,45 @@ function MainApp(){
           </div>;
         })()}
 
-        {money.total!=="0.00"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)"}}><div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:4}}>Économies ce mois</div><div style={{fontSize:28,fontWeight:700,color:"#d8b4fe"}}>{money.total}€</div>{money.details.map(d=><div key={d.name} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"var(--t2)",marginBottom:3}}><span>{d.emoji} {d.name}</span><span style={{color:"#d8b4fe",fontWeight:600}}>{d.saved}€</span></div>)}</div>}
+        {money.total!=="0.00"&&<MoneyCard money={money}/>}
+
+        {/* Fiche danger par drogue */}
+        <div style={{marginTop:8}}>
+          <div className="clbl" style={{paddingLeft:2}}>À savoir sur chaque substance</div>
+          {aList.map(k=>{
+            const d=DRUGS[k];
+            const dangerInfos={
+              tabac:"Le tabac tue 75 000 personnes par an en France. La nicotine crée une dépendance physique et psychologique puissante en quelques jours. Contient plus de 70 substances cancérigènes.",
+              cannabis:"Usage régulier associé à des troubles de la mémoire, de la motivation et à un risque de dépendance à long terme. Risque accru de psychose chez les personnes prédisposées.",
+              alcool:"3e cause de mortalité en France. Dépendance physique pouvant nécessiter un sevrage médical. Hépatotoxique, neurotoxique, et facteur de risque pour plusieurs cancers.",
+              cocaine:"Risque d'infarctus dans l'heure suivant une prise. Dépendance rapide. Effets sur le cœur, le cerveau et le système cardiovasculaire même lors des premières utilisations.",
+              mdma:"Neurotoxique à doses répétées. Déplétion sérotoninergique pouvant provoquer une dépression sévère post-prise. Hyperthermie potentiellement létale.",
+              amphet:"Troubles cardiovasculaires, psychose amphetaminique, dépendance rapide. Dégrade les neurones dopaminergiques de façon irréversible à hautes doses.",
+              heroine:"Risque vital à chaque prise (overdose). Dépendance physique extrêmement rapide. Arrêt brutal dangereux sans encadrement médical.",
+              ketamine:"Dommages vésicaux irréversibles à usage répété. Dissociation chronique. Risque de dépendance psychologique.",
+              lsd:"Risque de décompensation psychotique chez les personnes prédisposées. HPPD (flashbacks) possible à long terme.",
+              champi:"Risque de bad trip et de crise de panique. Décompensation psychotique possible si prédisposition. Peu de dépendance physique.",
+              crack:"Dépendance la plus rapide connue, parfois dès la première prise. Risque cardiaques, AVC, et crises d'épilepsie.",
+              benzo:"Dépendance en 2 à 4 semaines même à dose thérapeutique. Arrêt brutal potentiellement fatal. Sevrage à réduire progressivement sous supervision médicale.",
+              meth:"Destruction massive des neurones dopaminergiques. Psychose quasi systématique. Dégradation physique rapide et visible.",
+              poppers:"Rétinopathie avec usage intensif. Interaction mortelle avec le Viagra. Hypotension brutale.",
+              ghb:"Fenêtre thérapeutique très étroite — la dose récréative est proche de la dose létale. Amnésie et perte de conscience fréquentes.",
+              proto:"Neuropathie liée à la destruction de la vitamine B12. Peut être irréversible. Frostbite des voies aériennes.",
+              porno:"Désensibilisation progressive aux stimuli naturels. Impact sur les relations et l'estime de soi. Peut masquer une anxiété sociale ou une dépression sous-jacente.",
+            };
+            return<div key={k} style={{marginBottom:8,background:"var(--s)",borderRadius:12,padding:"12px 14px",border:"1px solid var(--b)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                <span style={{fontSize:18}}>{d.emoji}</span>
+                <div>
+                  <span style={{fontSize:13,fontWeight:600,color:d.color}}>{d.name}</span>
+                  <span style={{fontSize:10,marginLeft:8,padding:"1px 7px",borderRadius:8,background:`${d.riskColor}22`,color:d.riskColor,fontWeight:600}}>{d.risk}</span>
+                </div>
+              </div>
+              <p style={{fontSize:11,color:"var(--t2)",lineHeight:1.6}}>{dangerInfos[k]||"Substance psychoactive. Usage prolongé peut créer une dépendance physique ou psychologique."}</p>
+            </div>;
+          })}
+        </div>
+
       </div>}
 
       {/* ══ BADGES ══ */}
@@ -1230,11 +1533,7 @@ function MainApp(){
 
       {/* ══ CONFIG ══ */}
       {tab==="goals"&&<div className="tc">
-        <div className="card">
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></div>
-            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Substances actives</div>
-          </div>
+        <CollapsibleCard title="Substances actives" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>} badge={aList.length+" substances actives"}>
           {sortedDrugs.map(([k,d])=><div key={k} className={`drug-chip${act[k]?" on":""}`} onClick={()=>d.warning&&!act[k]?setHelpDrug(k):setAct(prev=>({...prev,[k]:!prev[k]}))}>
             <div style={{fontSize:17,width:26,textAlign:"center"}}>{d.emoji}</div>
             <div style={{flex:1}}>
@@ -1246,11 +1545,8 @@ function MainApp(){
           </div>)}
         </div>
 
-        <div className="card">
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-            <div style={{width:32,height:32,borderRadius:8,background:"var(--s2)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--t2)",flexShrink:0}}><svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <div style={{fontSize:13,fontWeight:600,color:"var(--t)"}}>Coûts & consommation</div>
-          </div>
+        <CollapsibleCard title="Coûts & consommation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} badge={money.total!=="0.00"?money.total+"€ économisés":null}>
+          <div style={{fontSize:11,color:"var(--t3)",marginBottom:10}}>Remplis uniquement les substances que tu suis.</div>
           {aList.includes("tabac")&&[{l:"Cigarettes / jour",k:"cigPerDay",s:1},{l:"Prix paquet (€)",k:"cigPackCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
           {aList.includes("cannabis")&&[{l:"Joints / jour",k:"jointsPerDay",s:0.5},{l:"Grammes / joint",k:"weedGPerJoint",s:0.1},{l:"Cannabis / g (€)",k:"weedGCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
           {!aList.includes("tabac")&&!aList.includes("cannabis")&&aList.filter(k=>k!=="porno").length===0&&<div style={{fontSize:12,color:"var(--t3)",textAlign:"center",padding:"8px 0"}}>Active des substances dans les réglages pour configurer les coûts.</div>}
@@ -1260,7 +1556,7 @@ function MainApp(){
             <div className="gr" style={{marginBottom:0}}><span>{DRUGS[k].unitShort} / semaine</span><input type="number" value={goals[`${k}_freq`]||0} onChange={e=>setGoals(p=>({...p,[`${k}_freq`]:+e.target.value}))} min="0"/></div>
           </div>)}
           <div style={{padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)"}}><div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:3}}>Économies ce mois</div><div style={{fontSize:24,fontWeight:700,color:"var(--green2)"}}>{money.total}€</div></div>
-        </div>
+        </CollapsibleCard>
 
         <div className="card">
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
@@ -1273,30 +1569,38 @@ function MainApp(){
           {nClean>=goals.target&&<div className="sban">Objectif atteint !</div>}
         </div>
 
+        {/* Personnalisations supplémentaires */}
+        <CollapsibleCard title="Personnalisation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>}>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            <div className="gr" style={{marginBottom:0}}>
+              <span>Afficher la flamme streak</span>
+              <button className={`toggle${goals.showFlame!==false?" on":" off"}`} onClick={()=>setGoals(p=>({...p,showFlame:p.showFlame===false?true:false}))}/>
+            </div>
+            <div className="gr" style={{marginBottom:0}}>
+              <span>Mode compact (moins d'infos)</span>
+              <button className={`toggle${goals.compactMode?" on":" off"}`} onClick={()=>setGoals(p=>({...p,compactMode:!p.compactMode}))}/>
+            </div>
+            <div>
+              <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Rappel quotidien</div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontSize:12,color:"var(--t3)"}}>Notification le soir</div>
+                <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={()=>setGoals(p=>({...p,notifOn:!p.notifOn}))}/>
+              </div>
+              {goals.notifOn&&<input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))} style={{marginTop:8,width:"100%"}}/>}
+            </div>
+            <div>
+              <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Motivation personnelle</div>
+              <textarea placeholder="Pourquoi je veux changer..." value={goals.motivation||""} onChange={e=>setGoals(p=>({...p,motivation:e.target.value}))} rows={3} style={{fontSize:14,marginTop:0}}/>
+            </div>
+          </div>
+        </CollapsibleCard>
+
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10}}>
           {[{v:streak+"j",l:"streak",c:"var(--green)"},{v:sc,l:"score",c:scColor},{v:earnedCount,l:"badges",c:"var(--green2)"},{v:longest+"j",l:"record",c:"#a855f7"}].map(s=><div key={s.l} className="card" style={{textAlign:"center",margin:0}}><div style={{fontSize:22,fontWeight:700,color:s.c}}>{s.v}</div><div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{s.l}</div></div>)}
         </div>
 
-        {/* Numéros d'aide */}
-        <div className="card" style={{background:"rgba(249,115,22,0.06)",border:"1px solid rgba(249,115,22,0.18)"}}>
-          <div style={{fontSize:10,color:"#fb923c",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:12}}>Besoin d'aide</div>
-          {[
-            {name:"Drogues Info Service",num:"0 800 23 13 13",desc:"Gratuit · Anonyme · 24h/24 · 7j/7",color:"#fb923c"},
-            {name:"Alcool Info Service",num:"0 980 980 930",desc:"Gratuit · Anonyme · 8h-2h",color:"#3b82f6"},
-            {name:"Tabac Info Service",num:"3989",desc:"Gratuit · Anonyme · lun-sam 8h-20h",color:"#f97316"},
-            {name:"Prévention suicide",num:"3114",desc:"Gratuit · 24h/24 · 7j/7",color:"#a855f7"},
-            {name:"SAMU",num:"15",desc:"Urgence médicale",color:"#ef4444"},
-          ].map(n=><div key={n.num} style={{display:"flex",alignItems:"center",gap:10,paddingBottom:10,marginBottom:10,borderBottom:"1px solid var(--b)"}}>
-            <div style={{minWidth:56,padding:"8px 6px",borderRadius:10,background:n.color+"18",border:`1px solid ${n.color}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              <span style={{fontSize:11,fontWeight:700,color:n.color,whiteSpace:"nowrap"}}>{n.num}</span>
-            </div>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:12,fontWeight:600,color:"var(--t)"}}>{n.name}</div>
-              <div style={{fontSize:10,color:"var(--t3)",marginTop:2,lineHeight:1.4}}>{n.desc}</div>
-            </div>
-          </div>)}
-          <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",lineHeight:1.5}}>Ces services sont confidentiels et gratuits. Parler à quelqu'un peut changer les choses.</div>
-        </div>
+        {/* Numéros d'aide — flip card */}
+        <HelpFlipCard/>
       </div>}
 
     </div>
@@ -1307,10 +1611,7 @@ function MainApp(){
     </div>
 
     {/* Expand overlays */}
-    {expand==="weekly"&&<ExpandView title="Progression hebdomadaire" onClose={()=>setExpand(null)}>
-      <div style={{background:"var(--s)",borderRadius:13,padding:13}}><div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:9}}>✦ Jours clean</div><WBars weeks={weeklyData} metric="clean" color="#22c55e"/></div>
-      {aList.map(k=><div key={k} style={{background:"var(--s)",borderRadius:13,padding:13}}><div style={{fontSize:11,color:DRUGS[k]?.color,fontWeight:600,marginBottom:9}}>{DRUGS[k]?.emoji} {DRUGS[k]?.name}</div><WBars weeks={weeklyData} metric={k} color={DRUGS[k]?.color}/></div>)}
-    </ExpandView>}
+
     
 
     {showSevrage&&<div className="mo">
@@ -1351,8 +1652,10 @@ function MainApp(){
         <div style={{display:"flex",gap:8,marginTop:4}}>
           <button onClick={()=>setHelpDrug(null)} style={{flex:1,padding:"11px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Annuler</button>
           <button onClick={()=>{setAct(prev=>({...prev,[helpDrug]:!prev[helpDrug]}));setHelpDrug(null);}} style={{flex:2,padding:"11px",borderRadius:10,background:"rgba(34,197,94,0.15)",border:"1.5px solid rgba(34,197,94,0.3)",color:"var(--green2)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Ajouter quand même</button>
+        </CollapsibleCard>
+
         </div>
-      </div>
+      </div>}
     </div>}
     {showLevel&&<ScoreLevelModal sc={sc} streak={streak} act={act} onClose={()=>setShowLevel(false)}/>}
     {showProfile&&<ProfileModal profile={profile} setProfile={setProfile} onClose={()=>setShowProfile(false)}/>}
@@ -1361,8 +1664,7 @@ function MainApp(){
   </div>;
 }
 
-// ── App wrapper — SEUL responsable de l'onboarding ───────────────────────────
-// Séparé de MainApp pour éviter toute violation des règles des hooks React
+// ── App wrapper ───────────────────────────────────────────────────────────────
 function App(){
   const [onboarded,setOnboarded]=useState(()=>ld(OT,false));
   const [activeDrugs,setActiveDrugs]=useState(()=>ld(DT,DEF_ACTIVE));

@@ -1533,7 +1533,8 @@ function MainApp(){
 
       {/* ══ CONFIG ══ */}
       {tab==="goals"&&<div className="tc">
-        <CollapsibleCard title="Substances actives" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>} badge={aList.length+" substances actives"}>
+
+        <CollapsibleCard title="Substances actives" defaultOpen={true} icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>} badge={aList.length+" substances actives"}>
           {sortedDrugs.map(([k,d])=><div key={k} className={`drug-chip${act[k]?" on":""}`} onClick={()=>d.warning&&!act[k]?setHelpDrug(k):setAct(prev=>({...prev,[k]:!prev[k]}))}>
             <div style={{fontSize:17,width:26,textAlign:"center"}}>{d.emoji}</div>
             <div style={{flex:1}}>
@@ -1543,19 +1544,22 @@ function MainApp(){
             <div style={{fontSize:10,padding:"2px 8px",borderRadius:10,fontWeight:600,background:`${d.riskColor}22`,color:d.riskColor,flexShrink:0}}>{d.risk}</div>
             <div className={`toggle${act[k]?" on":" off"}`} style={{background:act[k]?d.color:undefined}}/>
           </div>)}
-        </div>
+        </CollapsibleCard>
 
-        <CollapsibleCard title="Coûts & consommation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} badge={money.total!=="0.00"?money.total+"€ économisés":null}>
-          <div style={{fontSize:11,color:"var(--t3)",marginBottom:10}}>Remplis uniquement les substances que tu suis.</div>
+        <CollapsibleCard title="Coûts & consommation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>} badge={money.total!=="0.00"?money.total+"€ économisés":""}>
+          <div style={{fontSize:11,color:"var(--t3)",marginBottom:10}}>Remplis uniquement les substances actives.</div>
           {aList.includes("tabac")&&[{l:"Cigarettes / jour",k:"cigPerDay",s:1},{l:"Prix paquet (€)",k:"cigPackCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
           {aList.includes("cannabis")&&[{l:"Joints / jour",k:"jointsPerDay",s:0.5},{l:"Grammes / joint",k:"weedGPerJoint",s:0.1},{l:"Cannabis / g (€)",k:"weedGCost",s:0.5}].map(g=><div key={g.k} className="gr"><span>{g.l}</span><input type="number" value={goals[g.k]||0} onChange={e=>setGoals(p=>({...p,[g.k]:+e.target.value}))} min="0" step={g.s}/></div>)}
-          {!aList.includes("tabac")&&!aList.includes("cannabis")&&aList.filter(k=>k!=="porno").length===0&&<div style={{fontSize:12,color:"var(--t3)",textAlign:"center",padding:"8px 0"}}>Active des substances dans les réglages pour configurer les coûts.</div>}
           {aList.filter(k=>k!=="tabac"&&k!=="cannabis"&&k!=="porno").map(k=><div key={k} style={{background:"var(--s)",borderRadius:10,padding:"10px 12px",marginBottom:8}}>
             <div style={{fontSize:12,fontWeight:600,color:DRUGS[k].color,marginBottom:8}}>{DRUGS[k].emoji} {DRUGS[k].name}</div>
             <div className="gr"><span>Coût / {DRUGS[k].unitShort} (€)</span><input type="number" value={goals[`${k}_cost`]||DEF_COST[k]||""} onChange={e=>setGoals(p=>({...p,[`${k}_cost`]:+e.target.value}))} min="0"/></div>
             <div className="gr" style={{marginBottom:0}}><span>{DRUGS[k].unitShort} / semaine</span><input type="number" value={goals[`${k}_freq`]||0} onChange={e=>setGoals(p=>({...p,[`${k}_freq`]:+e.target.value}))} min="0"/></div>
           </div>)}
-          <div style={{padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)"}}><div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:3}}>Économies ce mois</div><div style={{fontSize:24,fontWeight:700,color:"var(--green2)"}}>{money.total}€</div></div>
+          {aList.length===0&&<div style={{fontSize:12,color:"var(--t3)",textAlign:"center",padding:"8px 0"}}>Active des substances ci-dessus.</div>}
+          <div style={{padding:"10px 12px",background:"var(--green3)",borderRadius:10,border:"1px solid rgba(34,197,94,0.2)",marginTop:8}}>
+            <div style={{fontSize:11,color:"var(--green)",fontWeight:600,marginBottom:3}}>Économies ce mois</div>
+            <div style={{fontSize:24,fontWeight:700,color:"var(--green2)"}}>{money.total}€</div>
+          </div>
         </CollapsibleCard>
 
         <div className="card">
@@ -1569,28 +1573,27 @@ function MainApp(){
           {nClean>=goals.target&&<div className="sban">Objectif atteint !</div>}
         </div>
 
-        {/* Personnalisations supplémentaires */}
         <CollapsibleCard title="Personnalisation" icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>}>
           <div style={{display:"flex",flexDirection:"column",gap:12}}>
             <div className="gr" style={{marginBottom:0}}>
               <span>Afficher la flamme streak</span>
-              <button className={`toggle${goals.showFlame!==false?" on":" off"}`} onClick={()=>setGoals(p=>({...p,showFlame:p.showFlame===false?true:false}))}/>
+              <button className={`toggle${goals.showFlame!==false?" on":" off"}`} onClick={()=>setGoals(p=>({...p,showFlame:!p.showFlame}))}/>
             </div>
             <div className="gr" style={{marginBottom:0}}>
-              <span>Mode compact (moins d'infos)</span>
+              <span>Mode compact</span>
               <button className={`toggle${goals.compactMode?" on":" off"}`} onClick={()=>setGoals(p=>({...p,compactMode:!p.compactMode}))}/>
             </div>
             <div>
               <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Rappel quotidien</div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:12,color:"var(--t3)"}}>Notification le soir</div>
+              <div className="gr" style={{marginBottom:6}}>
+                <span style={{fontSize:12,color:"var(--t3)"}}>Notification le soir</span>
                 <button className={`toggle${goals.notifOn?" on":" off"}`} onClick={()=>setGoals(p=>({...p,notifOn:!p.notifOn}))}/>
               </div>
-              {goals.notifOn&&<input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))} style={{marginTop:8,width:"100%"}}/>}
+              {goals.notifOn&&<input type="time" value={goals.notifTime||"22:00"} onChange={e=>setGoals(p=>({...p,notifTime:e.target.value}))} style={{width:"100%"}}/>}
             </div>
             <div>
-              <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Motivation personnelle</div>
-              <textarea placeholder="Pourquoi je veux changer..." value={goals.motivation||""} onChange={e=>setGoals(p=>({...p,motivation:e.target.value}))} rows={3} style={{fontSize:14,marginTop:0}}/>
+              <div style={{fontSize:12,color:"var(--t2)",marginBottom:6}}>Ma motivation</div>
+              <textarea placeholder="Pourquoi je veux changer..." value={goals.motivation||""} onChange={e=>setGoals(p=>({...p,motivation:e.target.value}))} rows={3} style={{marginTop:0}}/>
             </div>
           </div>
         </CollapsibleCard>
@@ -1599,8 +1602,8 @@ function MainApp(){
           {[{v:streak+"j",l:"streak",c:"var(--green)"},{v:sc,l:"score",c:scColor},{v:earnedCount,l:"badges",c:"var(--green2)"},{v:longest+"j",l:"record",c:"#a855f7"}].map(s=><div key={s.l} className="card" style={{textAlign:"center",margin:0}}><div style={{fontSize:22,fontWeight:700,color:s.c}}>{s.v}</div><div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{s.l}</div></div>)}
         </div>
 
-        {/* Numéros d'aide — flip card */}
         <HelpFlipCard/>
+
       </div>}
 
     </div>
@@ -1652,7 +1655,7 @@ function MainApp(){
         <div style={{display:"flex",gap:8,marginTop:4}}>
           <button onClick={()=>setHelpDrug(null)} style={{flex:1,padding:"11px",borderRadius:10,background:"var(--s)",border:"1px solid var(--b)",color:"var(--t3)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Annuler</button>
           <button onClick={()=>{setAct(prev=>({...prev,[helpDrug]:!prev[helpDrug]}));setHelpDrug(null);}} style={{flex:2,padding:"11px",borderRadius:10,background:"rgba(34,197,94,0.15)",border:"1.5px solid rgba(34,197,94,0.3)",color:"var(--green2)",fontFamily:"inherit",fontWeight:600,fontSize:13,cursor:"pointer"}}>Ajouter quand même</button>
-        </CollapsibleCard>
+        </div>
 
         </div>
       </div>}

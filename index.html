@@ -37,7 +37,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Inter',sy
 .tabs{position:fixed;bottom:0;left:0;right:0;padding:6px 6px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:rgba(10,10,15,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;gap:2px;z-index:50;}
 @media(prefers-color-scheme:light){.tabs{background:rgba(240,244,248,0.96);}}
 .tb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-family:inherit;font-size:9px;font-weight:600;color:var(--t3);transition:all .2s;}
-.tb.on{background:var(--green3);color:var(--green2);}
+.tb.on{background:var(--green3);color:var(--green2);}.tb{transition:all .2s cubic-bezier(.22,1,.36,1);}.tb:active{transform:scale(0.9);}
 .tc{animation:tcIn .26s cubic-bezier(.22,1,.36,1);}
 @keyframes tcIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .card{background:var(--bg2);border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);}
@@ -49,7 +49,7 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Inter',sy
 .gr span{font-size:12px;color:var(--t2);}
 .sban{margin-top:8px;padding:8px 12px;background:rgba(34,197,94,0.1);border-radius:8px;font-size:11px;color:var(--green2);text-align:center;}
 .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.nbtn{background:var(--s);border:1px solid var(--b);color:var(--t);border-radius:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.nbtn{background:var(--s);border:1px solid var(--b);color:var(--t);border-radius:9px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:transform .12s,background .15s;}.nbtn:active{transform:scale(0.85);background:var(--s2);}
 .vpill{display:flex;background:var(--s);border-radius:8px;padding:2px;gap:2px;}
 .vbtn{padding:4px 9px;border-radius:6px;border:none;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;background:transparent;color:var(--t3);display:flex;align-items:center;gap:3px;}
 .vbtn.on{background:var(--green3);color:var(--green2);}
@@ -105,7 +105,7 @@ input[type=time],input[type=text]{width:100%;}
 .drug-chip{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;border:1.5px solid transparent;margin-bottom:7px;cursor:pointer;background:var(--s);}
 .drug-chip.on{background:var(--green3);border-color:rgba(34,197,94,0.25);}
 .toggle{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;flex-shrink:0;}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.22,1,.36,1);box-shadow:0 1px 3px rgba(0,0,0,0.3);}
 .toggle.on{background:var(--green);}
 .toggle.on::after{transform:translateX(18px);}
 .toggle.off{background:var(--b2);}
@@ -125,7 +125,7 @@ input[type=time],input[type=text]{width:100%;}
 .field-in{width:100%;background:var(--s);border:1.5px solid var(--b);border-radius:12px;padding:13px 14px;font-size:16px;color:var(--t);font-family:inherit;outline:none;}
 .ss{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px;}
 .ss .m{background:var(--bg2);border:1px solid var(--b);border-radius:9px;padding:8px 4px;text-align:center;}
-.ss .m .v{font-size:15px;font-weight:700;}
+.ss .m .v{font-size:15px;font-weight:700;animation:popIn .4s cubic-bezier(.22,1,.36,1);}
 .ss .m .l{font-size:9px;color:var(--t3);margin-top:1px;}
 .flip-card{perspective:1000px;cursor:pointer;}
 .flip-inner{position:relative;transition:transform .6s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;}
@@ -570,8 +570,7 @@ function FactCard({streak}){
 }
 
 // ── Milestone ─────────────────────────────────────────────────────────────────
-function Milestone({streak,act}){
-  const [open,setOpen]=useState(false);
+function Milestone({streak,act,onShowAll}){
   const primary=Object.keys(act).find(k=>act[k]&&DRUGS[k]?.rec?.length>0);
   if(!primary)return null;
   const d=DRUGS[primary];
@@ -580,9 +579,8 @@ function Milestone({streak,act}){
   const prev=steps.filter(s=>s.days<=streak).pop();
   const pct=next?(prev?Math.round(((streak-prev.days)/(next.days-prev.days))*100):Math.round((streak/Math.max(next.days,1))*100)):100;
   const left=next?next.days-streak:0;
-  const allActive=Object.keys(act).filter(k=>act[k]&&DRUGS[k]?.rec?.length>0);
   return <>
-    <div className="milestone-card" style={{cursor:"pointer"}} onClick={()=>setOpen(true)}>
+    <div className="milestone-card anim-slide" style={{cursor:"pointer"}} onClick={onShowAll}>
       {!next
         ?<><div style={{fontSize:9,color:"var(--green2)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Objectif atteint</div><div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Continue comme ca, c est remarquable.</div></>
         :<>
@@ -598,27 +596,7 @@ function Milestone({streak,act}){
           <div style={{fontSize:10,color:"var(--green2)",fontWeight:600,marginTop:5}}>{pct}% vers ce cap</div>
         </>}
     </div>
-    {open&&<div className="mo" onClick={()=>setOpen(false)}>
-      <div className="mb" onClick={e=>e.stopPropagation()}>
-        <div className="mh" onClick={()=>setOpen(false)}/>
-        <div style={{fontSize:15,fontWeight:700,color:"var(--t)",marginBottom:14}}>Prochains caps</div>
-        {allActive.map(k=>{
-          const dd=DRUGS[k],st=dd.rec;
-          const nx=st.find(s=>s.days>streak);
-          const pv=st.filter(s=>s.days<=streak).pop();
-          const pc=nx?(pv?Math.round(((streak-pv.days)/(nx.days-pv.days))*100):Math.round((streak/Math.max(nx.days,1))*100)):100;
-          return <div key={k} style={{marginBottom:14,paddingBottom:14,borderBottom:"1px solid var(--b)"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{fontSize:18}}>{dd.emoji}</span>
-              <div><div style={{fontSize:13,fontWeight:600,color:dd.color}}>{dd.name}</div><div style={{fontSize:10,color:"var(--t3)"}}>{nx?"→ "+nx.t+" : "+nx.d:"Objectif atteint !"}</div></div>
-            </div>
-            <Bar pct={Math.max(pc,2)} color={dd.color}/>
-            <div style={{fontSize:10,color:"var(--t3)",marginTop:3}}>{pc}% · {SEV[k]}j objectif total</div>
-          </div>;
-        })}
-      </div>
-    </div>}
-  </>;
+      </>;
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────────
@@ -770,7 +748,7 @@ function DayModal({modal,data,act,onSave,onClear,onClose}){
       <div className="mh" onClick={onClose}/>
       {highRisk.length>0&&<div style={{margin:"0 0 10px",padding:"9px 11px",background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10}}>
         {highRisk.map(k=><div key={k} style={{fontSize:11,color:"#fb923c",lineHeight:1.5}}>{DRUGS[k].warning}</div>)}
-        <a href="tel:0800231313" style={{fontSize:10,color:"#fb923c",fontWeight:600,textDecoration:"none",display:"block",marginTop:4}}>Drogues Info Service : 0 800 23 13 13</a>
+        <a href="tel:0800231313" style={{fontSize:10,color:"#fb923c",fontWeight:600,textDecoration:"none",display:"block",marginTop:4}}>08 00 23 13 13 · Drogues Info Service</a>
       </div>}
       <div style={{marginBottom:12}}>
         <div style={{fontSize:9,color:"var(--t3)",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
@@ -876,18 +854,66 @@ function ProfileModal({profile,setProfile,onClose}){
 // ── Widget Manager ────────────────────────────────────────────────────────────
 function WidgetMgr({widgets,setWidgets,onClose}){
   const [items,setItems]=useState([...widgets]);
+  const dragIdx=useRef(null);
+  const overIdx=useRef(null);
+  const listRef=useRef(null);
+
+  function onDragStart(i){dragIdx.current=i;}
+  function onDragOver(e,i){e.preventDefault();overIdx.current=i;}
+  function onDrop(){
+    const from=dragIdx.current,to=overIdx.current;
+    if(from!=null&&to!=null&&from!==to){
+      const arr=[...items];
+      const item=arr.splice(from,1)[0];
+      arr.splice(to,0,item);
+      setItems(arr);
+    }
+    dragIdx.current=null;overIdx.current=null;
+  }
+  // Touch drag
+  function onTouchStart(i,e){dragIdx.current=i;e.currentTarget.style.opacity="0.5";}
+  function onTouchMove(e){
+    e.preventDefault();
+    const touch=e.touches[0];
+    const els=listRef.current?.querySelectorAll(".wdg-row");
+    if(!els)return;
+    let found=-1;
+    els.forEach((el,i)=>{
+      el.classList.remove("wdg-over");
+      const r=el.getBoundingClientRect();
+      if(touch.clientY>=r.top&&touch.clientY<=r.bottom){found=i;el.classList.add("wdg-over");}
+    });
+    overIdx.current=found>=0?found:overIdx.current;
+  }
+  function onTouchEnd(e){
+    e.currentTarget.style.opacity="1";
+    listRef.current?.querySelectorAll(".wdg-row").forEach(el=>el.classList.remove("wdg-over"));
+    onDrop();
+  }
+
   return <div className="mo" onClick={onClose}>
     <div className="mb" onClick={e=>e.stopPropagation()}>
       <div className="mh" onClick={onClose}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Widgets</div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+        <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>Personnaliser les widgets</div>
         <button onClick={()=>{setWidgets(items);onClose();}} style={{background:"var(--green3)",border:"1px solid rgba(34,197,94,0.3)",borderRadius:8,padding:"5px 14px",color:"var(--green2)",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>OK</button>
       </div>
-      {items.map((w,i)=><div key={w.id} style={{display:"flex",alignItems:"center",gap:12,background:"var(--bg2)",border:"1px solid var(--b)",borderRadius:13,padding:"13px 14px",marginBottom:6}}>
-        <div style={{color:"var(--t3)",flexShrink:0}}><IcGrip/></div>
-        <div style={{flex:1,fontSize:13,fontWeight:500,color:"var(--t)"}}>{w.label}</div>
-        <button className={"toggle"+(w.on?" on":" off")} onClick={e=>{e.stopPropagation();setItems(prev=>prev.map((x,j)=>j===i?{...x,on:!x.on}:x));}}/>
-      </div>)}
+      <div style={{fontSize:11,color:"var(--t3)",marginBottom:12}}>Maintiens et glisse pour trier · Bascule pour activer</div>
+      <div ref={listRef} style={{display:"flex",flexDirection:"column",gap:6}}>
+        {items.map((w,i)=><div key={w.id} className="wdg-row" draggable
+          onDragStart={()=>onDragStart(i)}
+          onDragOver={e=>onDragOver(e,i)}
+          onDrop={onDrop}
+          onTouchStart={e=>onTouchStart(i,e)}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          style={{display:"flex",alignItems:"center",gap:12,background:"var(--bg2)",border:"1px solid var(--b)",borderRadius:13,padding:"13px 14px",transition:"border-color .15s,background .15s",touchAction:"none",userSelect:"none"}}>
+          <div style={{color:"var(--t3)",flexShrink:0,cursor:"grab"}}><IcGrip/></div>
+          <div style={{fontSize:13,fontWeight:500,color:"var(--t)",flex:1}}>{w.label}</div>
+          <div style={{fontSize:10,color:w.on?"var(--green2)":"var(--t3)",marginRight:4}}>{w.on?"Visible":"Masqué"}</div>
+          <button className={"toggle"+(w.on?" on":" off")} onClick={e=>{e.stopPropagation();setItems(prev=>prev.map((x,j)=>j===i?{...x,on:!x.on}:x));}}/>
+        </div>)}
+      </div>
     </div>
   </div>;
 }
@@ -918,7 +944,7 @@ function Onboarding({onComplete}){
     onComplete({name,age,photo,activeDrugs:ad,goals:g});
   }
   function renderStep(){
-    if(cur==="welcome")return <div className="ob-slide" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",minHeight:"80%",paddingTop:24}}>
+    if(cur==="welcome")return <div key="welcome" className="ob-slide anim-slide" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",minHeight:"80%",paddingTop:24}}>
       <div style={{fontSize:52,marginBottom:20}}>🌱</div>
       <h1 style={{fontSize:26,fontWeight:700,color:"var(--t)",marginBottom:12,lineHeight:1.2}}>Bienvenue sur Habit Tracker</h1>
       <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:20}}>Ton outil personnel pour un parcours de progression sur-mesure.</p>
@@ -927,7 +953,7 @@ function Onboarding({onComplete}){
     if(cur==="name")return <div className="ob-slide" style={{paddingTop:24}}>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:28}}>
         <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
-        <div onClick={()=>fileRef.current?.click()} style={{position:"relative",cursor:"pointer",marginBottom:8}}>
+        <div onClick={()=>fileRef.current?.click()} style={{position:"relative",cursor:"pointer",marginBottom:8}} className="anim-pop">
           {photo?<img src={photo} alt="" style={{width:88,height:88,borderRadius:"50%",objectFit:"cover",border:"3px solid var(--green)",boxShadow:"0 0 0 6px rgba(34,197,94,0.12)"}}/>
           :<div style={{width:88,height:88,borderRadius:"50%",background:"var(--s2)",border:"2px dashed rgba(34,197,94,0.4)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:5}}>
             <IcUser/><span style={{fontSize:9,color:"rgba(34,197,94,0.7)",fontWeight:600}}>PHOTO</span>
@@ -942,12 +968,12 @@ function Onboarding({onComplete}){
       </div>
       <div style={{marginTop:16,padding:"12px 14px",background:"var(--green3)",borderRadius:12,border:"1px solid rgba(34,197,94,0.2)",textAlign:"center"}}><div style={{fontSize:11,color:"var(--t2)"}}>Donnees <span style={{color:"var(--green2)",fontWeight:600}}>uniquement sur ton appareil</span></div></div>
     </div>;
-    if(cur==="drugs")return <div className="ob-slide" style={{paddingTop:16}}>
+    if(cur==="drugs")return <div className="ob-slide anim-fade" style={{paddingTop:16}}>
       <div style={{fontSize:32,marginBottom:10}}>💊</div>
       <h2 style={{fontSize:20,fontWeight:700,color:"var(--t)",marginBottom:6}}>Quelles substances consommes-tu ?</h2>
       <p style={{fontSize:13,color:"var(--t3)",marginBottom:12}}>Aucun jugement - pour personnaliser ton suivi.</p>
       <div className="drug-sel-grid">
-        {sortedD.map(([k,d])=><div key={k} className={"drug-sel-item"+(selDrugs[k]?" on":"")} onClick={()=>{if(d.warning&&!selDrugs[k])setWarnDrug(k);else setSelDrugs(p=>({...p,[k]:!p[k]}));}}>
+        {sortedD.map(([k,d],i)=><div key={k} className={"drug-sel-item"+(selDrugs[k]?" on":"")} onClick={()=>{if(d.warning&&!selDrugs[k])setWarnDrug(k);else setSelDrugs(p=>({...p,[k]:!p[k]}));}} style={{animationDelay:(i*30)+"ms",animation:"popIn .3s cubic-bezier(.22,1,.36,1) both"}}>
           <div style={{fontSize:20}}>{d.emoji}</div>
           <div><div style={{fontSize:12,fontWeight:600,color:selDrugs[k]?(d.color==="#e5e7eb"?"#888":d.color):"var(--t)"}}>{d.name}</div><div style={{fontSize:9,color:"var(--t3)"}}>{SEV[k]}j</div></div>
           {selDrugs[k]&&<div style={{marginLeft:"auto",color:"var(--green)",fontSize:14,flexShrink:0}}>✓</div>}
@@ -984,13 +1010,13 @@ function Onboarding({onComplete}){
         </div>;})}
       </div>
     </div>;
-    if(cur==="done")return <div className="ob-slide" style={{display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",paddingTop:24}}>
-      <div style={{fontSize:52,marginBottom:16}}>✨</div>
+    if(cur==="done")return <div className="ob-slide anim-slide" style={{display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",paddingTop:24}}>
+      <div style={{fontSize:52,marginBottom:16,animation:"popIn .6s cubic-bezier(.22,1,.36,1)"}}>✨</div>
       <h2 style={{fontSize:24,fontWeight:700,color:"var(--t)",marginBottom:10}}>C est parti{name?", "+name:""} !</h2>
       <p style={{fontSize:14,color:"var(--t2)",lineHeight:1.7,marginBottom:16}}>Tout est configure. Commence par renseigner ta premiere journee.</p>
       <div style={{marginBottom:16,padding:"10px 14px",background:"rgba(249,115,22,0.07)",borderRadius:12,border:"1px solid rgba(249,115,22,0.18)",textAlign:"left",width:"100%"}}>
         <div style={{fontSize:11,fontWeight:600,color:"#fb923c",marginBottom:4}}>Information</div>
-        <p style={{fontSize:11,color:"var(--t3)",lineHeight:1.6}}>Cet outil est educatif. En cas de dependance severe, contacte un professionnel ou le <strong style={{color:"var(--t2)"}}>0 800 23 13 13</strong> (Drogues Info Service, gratuit 24h/24).</p>
+        <p style={{fontSize:11,color:"var(--t3)",lineHeight:1.6}}>Cet outil est educatif. En cas de dependance severe, contacte un professionnel ou le <strong style={{color:"var(--t2)"}}>08 00 23 13 13</strong> (Drogues Info Service, gratuit 24h/24).</p>
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:8,width:"100%"}}>
         {drugList.map(k=><div key={k} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"var(--s)",borderRadius:11,border:"1px solid var(--b)"}}>
@@ -1015,7 +1041,7 @@ function Onboarding({onComplete}){
           <div style={{fontSize:12,color:"#fb923c",lineHeight:1.5}}>{DRUGS[warnDrug]?.warning}</div>
         </div>
         <div style={{fontSize:11,fontWeight:600,color:"var(--t)",marginBottom:10}}>Numeros d aide gratuits et anonymes</div>
-        {[{name:"Drogues Info Service",num:"0800231313",display:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",display:"15",desc:"Urgence medicale"}].map(n=><a key={n.num} href={"tel:"+n.num} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)",textDecoration:"none"}}>
+        {[{name:"Drogues Info Service",num:"0800231313",display:"08 00 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",display:"15",desc:"Urgence medicale"}].map(n=><a key={n.num} href={"tel:"+n.num} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)",textDecoration:"none"}}>
           <div style={{minWidth:72,padding:"8px 6px",borderRadius:10,background:"rgba(249,115,22,0.15)",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <span style={{fontSize:11,fontWeight:800,color:"#fb923c"}}>{n.display}</span>
           </div>
@@ -1062,6 +1088,7 @@ function MainApp(){
   const [showProfile,setShowProfile]=useState(false);
   const [showWidgets,setShowWidgets]=useState(false);
   const [showLevel,setShowLevel]=useState(false);
+  const [showMilestone,setShowMilestone]=useState(false);
   const [showSevrage,setShowSevrage]=useState(false);
   const [helpDrug,setHelpDrug]=useState(null);
   const [pulse,setPulse]=useState(false);
@@ -1157,7 +1184,7 @@ function MainApp(){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{flex:1}}>
             <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Indice de progression</div>
-            <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1,letterSpacing:"-.02em"}}>{sc}<span style={{fontSize:18}}>/100</span></div>
+            <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1,letterSpacing:"-.02em",animation:"popIn .5s cubic-bezier(.22,1,.36,1)"}}>{sc}<span style={{fontSize:18}}>/100</span></div>
             <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
               <span className="level-badge" style={{background:lv.color+"22",color:lv.color,border:"1px solid "+lv.color+"44"}}>Niv.{lv.n} · {lv.label}</span>
               <span style={{fontSize:10,color:"var(--t3)"}}>›</span>
@@ -1189,7 +1216,7 @@ function MainApp(){
             const e=data[dk(year,month,d)]||null,col=dColor(e,act);
             const iT=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
             const future=isF(year,month,d);
-            return <div key={d} className={"day"+(iT?" td":"")+(future?" future":"")} style={{background:col?col+"22":"var(--s)",borderColor:col||(iT?"rgba(34,197,94,0.6)":"transparent"),color:col||"var(--t3)",animationDuration:Math.min(i*14,260)+160+"ms"}} onClick={()=>!future&&setModal({y:year,m:month,d})}>
+            return <div key={d} className={"day"+(iT?" td":"")+(future?" future":"")} style={{background:col?col+"22":"var(--s)",borderColor:col||(iT?"rgba(34,197,94,0.6)":"transparent"),color:col||"var(--t3)",animationDuration:Math.min(i*14,260)+160+"ms",transition:"transform .12s,background .2s"}} onClick={()=>!future&&setModal({y:year,m:month,d})}>
               <span style={{fontSize:11,fontWeight:iT?700:500}}>{d}</span>
               {e&&!future&&<span style={{fontSize:8,marginTop:1}}>{dEmoji(e,act)}</span>}
               {e?.mood!=null&&!future&&<span style={{position:"absolute",bottom:2,right:2,fontSize:7}}>{MOODS[e.mood]?.e}</span>}
@@ -1286,7 +1313,7 @@ function MainApp(){
             </div>;
           })}
         </div></div>}
-        {w.id==="milestone"&&<Milestone streak={streak} act={act}/>}
+        {w.id==="milestone"&&<Milestone streak={streak} act={act} onShowAll={()=>setShowMilestone(true)}/>}
         {w.id==="money"&&money.total!=="0.00"&&<div className="card" style={{background:"rgba(168,85,247,0.07)",borderColor:"rgba(168,85,247,0.18)"}}><div style={{fontSize:11,color:"#a855f7",fontWeight:600,marginBottom:3}}>Economies ce mois</div><div style={{fontSize:28,fontWeight:700,color:"#d8b4fe"}}>{money.total}€</div></div>}
         {w.id==="fact"&&<FactCard streak={streak}/>}
       </React.Fragment>)}
@@ -1335,7 +1362,7 @@ function MainApp(){
           </div>
         </div>;
       })()}
-      <Milestone streak={streak} act={act}/>
+      <Milestone streak={streak} act={act} onShowAll={()=>setShowMilestone(true)}/>
 
 
 
@@ -1417,7 +1444,7 @@ function MainApp(){
       <div style={{marginBottom:12}}><Bar pct={earnedCount/badges.length*100} color="linear-gradient(90deg,#22c55e,#4ade80)"/></div>
       {badges.map(b=><React.Fragment key={b.id}>
         {b.cat&&<div className="badge-cat">{b.cat}</div>}
-        <div className={"badge-item"+(b.earned?" earned":" locked")}>
+        <div className={"badge-item"+(b.earned?" earned anim-slide":" locked")}>
           <div style={{fontSize:20,width:32,textAlign:"center",flexShrink:0,filter:b.earned?"none":"grayscale(1) opacity(0.25)"}}>{b.icon}</div>
           <div style={{flex:1}}><div style={{fontSize:12,fontWeight:600,color:b.earned?"var(--t)":"var(--t3)"}}>{b.name}</div><div style={{fontSize:10,color:"var(--t3)",marginTop:1}}>{b.desc}</div></div>
           {b.earned&&<div style={{color:"var(--green)",fontSize:13,marginLeft:"auto",flexShrink:0}}>✓</div>}
@@ -1512,6 +1539,29 @@ function MainApp(){
     {showWidgets&&<WidgetMgr widgets={widgets} setWidgets={setWidgets} onClose={()=>setShowWidgets(false)}/>}
     {modal&&<DayModal modal={modal} data={data} act={act} onSave={saveEntry} onClear={clearEntry} onClose={()=>setModal(null)}/>}
 
+    {showMilestone&&<div className="mo" onClick={()=>setShowMilestone(false)}>
+      <div className="mb" onClick={e=>e.stopPropagation()}>
+        <div className="mh" onClick={()=>setShowMilestone(false)}/>
+        <div style={{fontSize:15,fontWeight:700,color:"var(--t)",marginBottom:14}}>Prochains caps</div>
+        {Object.keys(act).filter(k=>act[k]&&DRUGS[k]?.rec?.length>0).map(k=>{
+          const dd=DRUGS[k],st=dd.rec;
+          const nx=st.find(s=>s.days>streak);
+          const pv=st.filter(s=>s.days<=streak).pop();
+          const pc=nx?(pv?Math.round(((streak-pv.days)/(nx.days-pv.days))*100):Math.round((streak/Math.max(nx.days,1))*100)):100;
+          return <div key={k} style={{marginBottom:14,paddingBottom:14,borderBottom:"1px solid var(--b)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span style={{fontSize:18}}>{dd.emoji}</span>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:dd.color}}>{dd.name}</div>
+                <div style={{fontSize:10,color:"var(--t3)"}}>{nx?"→ "+nx.t+" : "+nx.d:"Objectif atteint !"}</div>
+              </div>
+            </div>
+            <Bar pct={Math.max(pc,2)} color={dd.color}/>
+            <div style={{fontSize:10,color:"var(--t3)",marginTop:3}}>{pc}% · {SEV[k]}j objectif total</div>
+          </div>;
+        })}
+      </div>
+    </div>}
     {showSevrage&&<div className="mo">
       <div className="mb">
         <div style={{textAlign:"center",paddingTop:8,paddingBottom:8}}>
@@ -1538,7 +1588,7 @@ function MainApp(){
           <div style={{fontSize:12,color:"#fb923c",lineHeight:1.5}}>{DRUGS[helpDrug].warning}</div>
         </div>}
         <div style={{fontSize:11,fontWeight:600,color:"var(--t)",marginBottom:10}}>Numeros d aide</div>
-        {[{name:"Drogues Info Service",num:"0800231313",display:"0 800 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",display:"15",desc:"Urgence medicale"}].map(n=><a key={n.num} href={"tel:"+n.num} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)",textDecoration:"none"}}>
+        {[{name:"Drogues Info Service",num:"0800231313",display:"08 00 23 13 13",desc:"Gratuit, anonyme, 24h/24"},{name:"SAMU",num:"15",display:"15",desc:"Urgence medicale"}].map(n=><a key={n.num} href={"tel:"+n.num} onClick={e=>e.stopPropagation()} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:"var(--s)",borderRadius:11,marginBottom:8,border:"1px solid var(--b)",textDecoration:"none"}}>
           <div style={{minWidth:72,padding:"8px 6px",borderRadius:10,background:"rgba(249,115,22,0.15)",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <span style={{fontSize:11,fontWeight:800,color:"#fb923c"}}>{n.display}</span>
           </div>

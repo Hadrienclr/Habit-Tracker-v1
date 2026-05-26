@@ -781,10 +781,10 @@ function Stats30j({data,aList}){
         const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
         const d=DRUGS[k];
         if(!d)return null;
-        return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10,animation:"popIn .4s cubic-bezier(.22,1,.36,1)"}}>
-          <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
-          <div style={{fontSize:22,fontWeight:700,color:total30>0?d.color:"var(--t3)",lineHeight:1}}>{total30}</div>
-          <div style={{fontSize:9,color:"var(--t3)",marginTop:3}}>{d.unitShort}</div>
+        return <div key={k} style={{textAlign:"center",padding:"12px 6px 10px",background:"var(--s)",borderRadius:10}}>
+          <div style={{fontSize:20,marginBottom:4,lineHeight:1}}>{d.emoji}</div>
+          <div style={{fontSize:26,fontWeight:800,color:total30>0?d.color:"var(--t3)",lineHeight:1}}>{total30}</div>
+          <div style={{fontSize:9,color:"var(--t3)",marginTop:4,fontWeight:600}}>{d.unitShort}</div>
         </div>;
       })}
     </div>
@@ -1302,7 +1302,7 @@ function MainApp(){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{flex:1}}>
             <div style={{fontSize:9,color:"var(--t3)",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>Indice de progression</div>
-            <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1,letterSpacing:"-.02em",animation:"popIn .5s cubic-bezier(.22,1,.36,1)"}}>{sc}<span style={{fontSize:18}}>/100</span></div>
+            <div style={{fontSize:48,fontWeight:700,color:scColor,lineHeight:1,letterSpacing:"-.02em",transition:"color .3s ease"}}>{sc}<span style={{fontSize:18}}>/100</span></div>
             <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
               <span className="level-badge" style={{background:lv.color+"22",color:lv.color,border:"1px solid "+lv.color+"44"}}>Niv.{lv.n} · {lv.label}</span>
               <span style={{fontSize:10,color:"var(--t3)"}}>›</span>
@@ -1389,7 +1389,7 @@ function MainApp(){
         <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
       </div>
 
-      <Stats30j data={data} aList={aList}/>
+      <div style={{marginTop:16}}><Stats30j data={data} aList={aList}/></div>
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8,marginBottom:10}}>
         <div style={{fontSize:11,fontWeight:600,color:"var(--t2)"}}>Widgets</div>
@@ -1436,7 +1436,7 @@ function MainApp(){
         {nClean>=goals.target?<div style={{fontSize:11,color:"var(--green2)",fontWeight:600,marginTop:6,textAlign:"center"}}>Objectif atteint ce mois !</div>:<div style={{fontSize:10,color:"var(--t3)",marginTop:5}}>{goals.target-nClean} jour{goals.target-nClean>1?"s":""} restant{goals.target-nClean>1?"s":""}</div>}
       </div>}
 
-      <Stats30j data={data} aList={aList}/>
+      <div style={{marginTop:16}}><Stats30j data={data} aList={aList}/></div>
       <Milestone streak={streak} act={act} onShowAll={()=>setShowMilestone(true)}/>
 
 

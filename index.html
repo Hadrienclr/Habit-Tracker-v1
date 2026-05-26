@@ -534,7 +534,7 @@ function OrganCard({organKey,emoji,name,streak,act,loggedDays}){
           <div style={{fontSize:13,fontWeight:700,color:streakColor,marginBottom:6}}>{emoji} {name}</div>
           <p style={{fontSize:11,color:"var(--t)",lineHeight:1.6}}>{text}</p>
         </div>
-        <div style={{fontSize:9,color:"var(--t3)",marginTop:6}}>Info educative INSERM/OMS · Tap pour retourner</div>
+        <div style={{fontSize:9,color:"var(--t3)",marginTop:6}}>Info educative INSERM/OMS</div>
       </div>
     </div>
   </div>;
@@ -670,6 +670,128 @@ function PieStats({data,act,aList}){
     <div style={{fontSize:10,color:"var(--t3)",textAlign:"center",marginTop:8}}>30 derniers jours</div>
   </div>;
 }
+// ── MoodChart — graphique d humeur avec évolution ────────────────────────────
+function MoodChart({data}){
+  const allEntries=Object.entries(data).filter(([,e])=>e&&e.mood!=null&&e.mood>=0&&e.mood<=4).sort(([a],[b])=>a.localeCompare(b));
+  if(allEntries.length===0)return null;
+
+  // Compteurs globaux
+  const moodCounts=[0,0,0,0,0];
+  allEntries.forEach(([,e])=>moodCounts[e.mood]++);
+  const total=moodCounts.reduce((a,b)=>a+b,0);
+  const avg=allEntries.reduce((s,[,e])=>s+e.mood,0)/allEntries.length;
+
+  // Courbe d evolution sur 30j
+  const today=new Date();
+  const last30=Array.from({length:30},(_,i)=>{
+    const d=new Date(today);d.setDate(d.getDate()-(29-i));
+    const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
+    const e=data[k];
+    return{x:i,v:e&&e.mood!=null?e.mood:-1,date:d.getDate()};
+  });
+  const pts=last30.filter(p=>p.v>=0);
+
+  // SVG courbe
+  const W=280,H=60,p=6;
+  const moodColor=(v)=>MOODS[Math.round(v)]?.c||"#6b7280";
+  const yPos=(v)=>H-p-(v/(4))*(H-p*2);
+
+  let pathD="";
+  pts.forEach((pt,i)=>{
+    const x=p+(pt.x/29)*(W-p*2);
+    const y=yPos(pt.v);
+    pathD+=(i===0?"M ":"L ")+x+" "+y+" ";
+  });
+
+  return <div className="card">
+    <div className="clbl">Humeur</div>
+
+    {/* Score moyen */}
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+      <div style={{fontSize:32}}>{MOODS[Math.round(avg)]?.e||"😐"}</div>
+      <div>
+        <div style={{fontSize:16,fontWeight:700,color:moodColor(avg)}}>{MOODS[Math.round(avg)]?.l||"Ok"}</div>
+        <div style={{fontSize:10,color:"var(--t3)"}}>Moyenne sur {total} jours renseignés</div>
+      </div>
+    </div>
+
+    {/* Courbe 30j */}
+    {pts.length>1&&<div style={{marginBottom:12}}>
+      <div style={{fontSize:9,color:"var(--t3)",marginBottom:4}}>Évolution 30 derniers jours</div>
+      <svg width="100%" viewBox={"0 0 "+W+" "+H} style={{display:"block"}}>
+        <defs>
+          <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.3"/>
+            <stop offset="100%" stopColor="#22c55e" stopOpacity="0"/>
+          </linearGradient>
+        </defs>
+        {/* Zones de fond */}
+        {[[3.5,4,"rgba(34,197,94,0.06)"],[2.5,3.5,"rgba(74,222,128,0.04)"],[1.5,2.5,"rgba(107,114,128,0.04)"],[0,1.5,"rgba(239,68,68,0.04)"]].map(([low,high,col],i)=>(
+          <rect key={i} x={p} y={yPos(high)} width={W-p*2} height={yPos(low)-yPos(high)} fill={col}/>
+        ))}
+        {/* Courbe */}
+        {pathD&&<path d={pathD+"L "+((p+(pts[pts.length-1].x/29)*(W-p*2)))+" "+H+" L "+p+" "+H+" Z"} fill="url(#moodGrad)"/>}
+        {pathD&&<path d={pathD} fill="none" stroke={moodColor(avg)} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>}
+        {/* Points */}
+        {pts.map((pt,i)=>(
+          <circle key={i} cx={p+(pt.x/29)*(W-p*2)} cy={yPos(pt.v)} r={3} fill={moodColor(pt.v)} stroke="var(--bg2)" strokeWidth="1.5"/>
+        ))}
+        {/* Labels Y */}
+        {MOODS.map((m,i)=>(
+          <text key={i} x={p-2} y={yPos(i)+4} fontSize="8" fill="var(--t3)" textAnchor="end">{m.e}</text>
+        ))}
+      </svg>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
+        <span style={{fontSize:9,color:"var(--t3)"}}>Il y a 30j</span>
+        <span style={{fontSize:9,color:"var(--t3)"}}>Aujourd hui</span>
+      </div>
+    </div>}
+
+    {/* Distribution */}
+    <div style={{display:"flex",gap:4}}>
+      {MOODS.map((m,i)=>{
+        const pct=total>0?(moodCounts[i]/total)*100:0;
+        return <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+          <div style={{fontSize:16}}>{m.e}</div>
+          <div style={{width:"100%",height:32,borderRadius:4,background:"var(--s2)",display:"flex",flexDirection:"column",justifyContent:"flex-end",overflow:"hidden"}}>
+            <div style={{width:"100%",height:pct+"%",background:m.c,borderRadius:4,transition:"height .8s cubic-bezier(.4,0,.2,1)",minHeight:moodCounts[i]>0?3:0}}/>
+          </div>
+          <div style={{fontSize:10,fontWeight:700,color:moodCounts[i]>0?m.c:"var(--t3)"}}>{moodCounts[i]}</div>
+        </div>;
+      })}
+    </div>
+  </div>;
+}
+
+
+// ── Stats 30 derniers jours ───────────────────────────────────────────────────
+function Stats30j({data,aList}){
+  if(!aList||aList.length===0)return null;
+  const today=new Date();
+  const days30=Array.from({length:30},(_,i)=>{
+    const d=new Date(today);d.setDate(d.getDate()-(29-i));
+    const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
+    return data[k]||null;
+  });
+  const cols=Math.min(aList.length,3);
+  return <div className="card">
+    <div className="clbl">Consommation — 30 derniers jours</div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat("+cols+",1fr)",gap:8}}>
+      {aList.map(k=>{
+        const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
+        const d=DRUGS[k];
+        if(!d)return null;
+        return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10,animation:"popIn .4s cubic-bezier(.22,1,.36,1)"}}>
+          <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
+          <div style={{fontSize:22,fontWeight:700,color:total30>0?d.color:"var(--t3)",lineHeight:1}}>{total30}</div>
+          <div style={{fontSize:9,color:"var(--t3)",marginTop:3}}>{d.unitShort}</div>
+        </div>;
+      })}
+    </div>
+  </div>;
+}
+
+
 function MoneyCard({money}){
   const [open,setOpen]=useState(true);
   return <div className="card" style={{background:"rgba(168,85,247,0.07)",border:"1px solid rgba(168,85,247,0.18)"}}>
@@ -740,16 +862,12 @@ function DayModal({modal,data,act,onSave,onClear,onClose}){
     return raw?{...base,...raw}:base;
   });
   const hasCons=aList.some(k=>(local[k]||0)>0);
-  const highRisk=aList.filter(k=>DRUGS[k]?.warning);
   function toggleClean(){setLocal(p=>{if(p.clean)return{...p,clean:false};const n={...p,clean:true,logged:true};aList.forEach(k=>{n[k]=0;});return n;});}
   function setVal(k,v){setLocal(p=>({...p,[k]:v,clean:false,logged:true}));}
   return <div className="mo" onClick={onClose}>
     <div className="mb" onClick={e=>e.stopPropagation()}>
       <div className="mh" onClick={onClose}/>
-      {highRisk.length>0&&<div style={{margin:"0 0 10px",padding:"9px 11px",background:"rgba(249,115,22,0.08)",border:"1px solid rgba(249,115,22,0.2)",borderRadius:10}}>
-        {highRisk.map(k=><div key={k} style={{fontSize:11,color:"#fb923c",lineHeight:1.5}}>{DRUGS[k].warning}</div>)}
-        <a href="tel:0800231313" style={{fontSize:10,color:"#fb923c",fontWeight:600,textDecoration:"none",display:"block",marginTop:4}}>08 00 23 13 13 · Drogues Info Service</a>
-      </div>}
+
       <div style={{marginBottom:12}}>
         <div style={{fontSize:9,color:"var(--t3)",letterSpacing:".1em",textTransform:"uppercase"}}>Journal du</div>
         <div style={{fontSize:15,fontWeight:600,color:"var(--t)"}}>{modal.d} {MONTHS[modal.m]} {modal.y}</div>
@@ -802,7 +920,7 @@ function HelpFlipCard(){
       <div className="flip-face" style={{background:"rgba(249,115,22,0.06)",borderColor:"rgba(249,115,22,0.18)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
           <div style={{fontSize:10,color:"#fb923c",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase"}}>Besoin d aide</div>
-          <div style={{fontSize:9,color:"#fb923c",opacity:0.7}}>Tap pour retourner</div>
+
         </div>
         {NUMS.map(n=><a key={n.num} href={"tel:"+n.num} onClick={e=>e.stopPropagation()} className="help-num">
           <div style={{minWidth:70,padding:"8px 6px",borderRadius:9,background:n.color+"18",border:"1px solid "+n.color+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -1271,29 +1389,7 @@ function MainApp(){
         <div className="m"><div className="v" style={{color:"#a3e635"}}>{pct}%</div><div className="l">taux</div></div>
       </div>
 
-      {/* Stats 30 derniers jours — toujours visible */}
-      {aList.length>0&&(()=>{
-        const today=new Date();
-        const days30=Array.from({length:30},(_,i)=>{
-          const d=new Date(today);d.setDate(d.getDate()-(29-i));
-          const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
-          return data[k]||null;
-        });
-        return <div className="card">
-          <div className="clbl">Consommation — 30 derniers jours</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat("+Math.min(aList.length,3)+",1fr)",gap:8}}>
-            {aList.map(k=>{
-              const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
-              const d=DRUGS[k];
-              return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10}}>
-                <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
-                <div style={{fontSize:20,fontWeight:700,color:total30>0?d.color:"var(--t3)"}}>{total30}</div>
-                <div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{d.unitShort}</div>
-              </div>;
-            })}
-          </div>
-        </div>;
-      })()}
+      <Stats30j data={data} aList={aList}/>
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8,marginBottom:10}}>
         <div style={{fontSize:11,fontWeight:600,color:"var(--t2)"}}>Widgets</div>
@@ -1340,28 +1436,7 @@ function MainApp(){
         {nClean>=goals.target?<div style={{fontSize:11,color:"var(--green2)",fontWeight:600,marginTop:6,textAlign:"center"}}>Objectif atteint ce mois !</div>:<div style={{fontSize:10,color:"var(--t3)",marginTop:5}}>{goals.target-nClean} jour{goals.target-nClean>1?"s":""} restant{goals.target-nClean>1?"s":""}</div>}
       </div>}
 
-      {aList.length>0&&(()=>{
-        const today=new Date();
-        const days30=Array.from({length:30},(_,i)=>{
-          const d=new Date(today);d.setDate(d.getDate()-(29-i));
-          const k=dk(d.getFullYear(),d.getMonth(),d.getDate());
-          return data[k]||null;
-        });
-        return <div className="card">
-          <div className="clbl">Consommation — 30 derniers jours</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat("+Math.min(aList.length,3)+",1fr)",gap:8}}>
-            {aList.map(k=>{
-              const total30=days30.reduce((s,e)=>s+(e?e[k]||0:0),0);
-              const d=DRUGS[k];
-              return <div key={k} style={{textAlign:"center",padding:"10px 6px",background:"var(--s)",borderRadius:10}}>
-                <div style={{fontSize:18,marginBottom:3}}>{d.emoji}</div>
-                <div style={{fontSize:20,fontWeight:700,color:total30>0?d.color:"var(--t3)"}}>{total30}</div>
-                <div style={{fontSize:9,color:"var(--t3)",marginTop:2}}>{d.unitShort}</div>
-              </div>;
-            })}
-          </div>
-        </div>;
-      })()}
+      <Stats30j data={data} aList={aList}/>
       <Milestone streak={streak} act={act} onShowAll={()=>setShowMilestone(true)}/>
 
 
@@ -1378,26 +1453,7 @@ function MainApp(){
         <PieStats data={data} act={act} aList={aList}/>
       </div>
 
-      {(()=>{
-        const moodCounts=[0,0,0,0,0];
-        Object.values(data).forEach(e=>{if(e?.mood!=null&&e.mood>=0&&e.mood<=4)moodCounts[e.mood]++;});
-        const total=moodCounts.reduce((a,b)=>a+b,0);
-        if(total===0)return null;
-        return <div className="card">
-          <div className="clbl">Humeur globale</div>
-          <div style={{display:"flex",gap:6,marginBottom:10}}>
-            {MOODS.map((m,i)=><div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-              <div style={{fontSize:20}}>{m.e}</div>
-              <div style={{fontSize:13,fontWeight:700,color:moodCounts[i]>0?m.c:"var(--t3)"}}>{moodCounts[i]}</div>
-              <div style={{fontSize:9,color:"var(--t3)"}}>{m.l}</div>
-              <div style={{width:"100%",height:4,borderRadius:2,background:"var(--s2)",overflow:"hidden"}}>
-                <div style={{height:"100%",background:m.c,width:(total>0?moodCounts[i]/Math.max(...moodCounts)*100:0)+"%",transition:"width .9s"}}/>
-              </div>
-            </div>)}
-          </div>
-          <div style={{fontSize:10,color:"var(--t3)"}}>{total} journee(s) avec humeur renseignee</div>
-        </div>;
-      })()}
+<MoodChart data={data}/>
 
       {(()=>{
         const allCtx={};
@@ -1539,7 +1595,7 @@ function MainApp(){
     {showWidgets&&<WidgetMgr widgets={widgets} setWidgets={setWidgets} onClose={()=>setShowWidgets(false)}/>}
     {modal&&<DayModal modal={modal} data={data} act={act} onSave={saveEntry} onClear={clearEntry} onClose={()=>setModal(null)}/>}
 
-    {showMilestone&&<div className="mo" onClick={()=>setShowMilestone(false)}>
+    {showMilestone&&<div className="mo" style={{zIndex:500}} onClick={()=>setShowMilestone(false)}>
       <div className="mb" onClick={e=>e.stopPropagation()}>
         <div className="mh" onClick={()=>setShowMilestone(false)}/>
         <div style={{fontSize:15,fontWeight:700,color:"var(--t)",marginBottom:14}}>Prochains caps</div>
